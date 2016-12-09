@@ -13,6 +13,17 @@ bool ends_with(const std::string& str, const std::string& suffix) {
 	return str.find_last_of(suffix) == str.size() - 1;
 }
 
+std::vector<std::string> split(const std::string& str, char delim) {
+	std::vector<std::string> elems;
+	std::stringstream ss(str);
+
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		elems.push_back(item);
+	}
+	return elems;
+}
+
 void write_to_mp3(const std::string& title, const std::string& data) {
 	std::string path = ends_with(title, ".mp3") ? title : title + ".mp3";
 
@@ -24,16 +35,10 @@ void write_to_mp3(const std::string& title, const std::string& data) {
 }
 
 std::string youtube_to_download(const std::string& id) {
-	std::string url = "http://savevideos.xyz/api?v=" + id;
+	const static std::string BASE = "http://api.convert2mp3.cc/check.php?api=true&v=";
 
-	auto response = cpr::Get(cpr::Url{url});
-	auto json = json::parse(response.text);
-	/*
-	std::cout<<"response:"<<std::endl
-			 <<json.dump(4)<<std::endl
-			 <<std::endl;
-	*/
-	return json["audio"][0]["url"];
+	int rand = std::rand()%3500000;
+	return BASE + id + "&h=" + std::to_string(rand);
 }
 
 std::string to_http(const std::string& url) {
@@ -42,26 +47,33 @@ std::string to_http(const std::string& url) {
 		   							   "http" + url;
 }
 
-void download_song(const std::string& url) {
-	auto response = cpr::Get(cpr::Url{url});
-	//auto json = json::parse(response.text);
-	/*
-	std::cout<<"url 2: "<<url<<std::endl
-			 <<"response 2:"<<std::endl
-			 <<response.text<<std::endl
-			 <<std::endl;
-	*/
-	std::cout<<response.text;
+void download_song(const std::string& url, const std::string& title = "") {
+	// I think it sometimes takes multiple requests for the song to finish downloading
+	// Could be wrong. Here in the mean time just in case
+	static const int MAX_NUM_REQUESTS = 10;
+	for (int i = 0; i < MAX_NUM_REQUESTS; ++i) {
+		auto response = cpr::Get(cpr::Url{url});
+		std::cout<<response.text<<std::endl;
+
+		auto tokens = split(response.text, '|');
+		if (tokens[0] == "OK" && tokens.size() == 4) {
+			const std::string songUrl = "http://dl" + tokens[1] + ".downloader.space/dl.php?id=" + tokens[2];
+			response = cpr::Get(cpr::Url{songUrl});
+
+			write_to_mp3(title == "" ? tokens[3] : title, response.text);
+			return;
+		}
+	}
 }
 
 int main(int argc, char** argv) {
-	const std::string christmas = "http://dl3.downloader.space/dl.php?id=e506ebfd91227183a20f223ec8479998";
-	const std::string christmas2 = "pFjdfjrtf1Q";
+	const std::string title = "Thats_Christmas_To_Me";
+	const std::string ytId = "pFjdfjrtf1Q";
 
-	const std::string downloadUrl = youtube_to_download(christmas2);
+	std::cout<<"Downloading "<<title<<" (ID = "<<ytId<<")..."<<std::endl;
+
+	const std::string downloadUrl = youtube_to_download(ytId);
+	std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
+
 	download_song(to_http(downloadUrl));
-	/*
-    auto response = cpr::Get(cpr::Url{christmas});
-    write_to_mp3("Thats_Christmas_To_Me.mp3", response.text);
-    */
 }
