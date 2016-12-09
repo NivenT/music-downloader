@@ -66,14 +66,32 @@ void download_song(const std::string& url, const std::string& title = "") {
 	}
 }
 
+void set_params(int argc, char** argv, std::string& title, std::string& ytID) {
+	switch(argc) {
+		case 1:
+			title = "Thats_Christmas_To_Me";
+			ytID = "pFjdfjrtf1Q";
+			break;
+
+		case 2:
+			title = "";
+			ytID = argv[1];
+			break;
+
+		default:
+			title = argv[2];
+			ytID = argv[1];
+			break;
+	}
+}
+
 int main(int argc, char** argv) {
-	const std::string title = "Thats_Christmas_To_Me";
-	const std::string ytId = "pFjdfjrtf1Q";
+	std::string title, ytID;
+	set_params(argc, argv, title, ytID);
 
-	std::cout<<"Downloading "<<title<<" (ID = "<<ytId<<")..."<<std::endl;
-
-	const std::string downloadUrl = youtube_to_download(ytId);
+	std::cout<<"Downloading "<<title<<" (ID = "<<ytID<<")..."<<std::endl;
+	const std::string downloadUrl = youtube_to_download(ytID);
 	std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
 
-	download_song(to_http(downloadUrl));
+	download_song(to_http(downloadUrl), title);
 }
