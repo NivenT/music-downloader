@@ -14,7 +14,7 @@ bool ends_with(const std::string& str, const std::string& suffix) {
 	return str.find_last_of(suffix) == str.size() - 1;
 }
 
-std::string prettify(const std::string& title) {
+std::string fileify(const std::string& title) {
 	std::string ret = title;
 	std::transform(title.begin(), title.end(), ret.begin(), [](char c) {
 		return c == ' ' ? '_' : c;
@@ -37,7 +37,7 @@ std::string urlify(const std::string& query) {
 }
 
 void write_to_mp3(const std::string& title, const std::string& data) {
-	std::string path = prettify(title);
+	std::string path = fileify(title);
 
 	std::cout<<"Saving song to "<<path<<std::endl;
 	std::ofstream file(path.c_str());
@@ -133,7 +133,7 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 void set_params(int argc, char** argv, std::string& apikey, std::string& song) {
 	switch(argc) {
 		case 1:
-			std::cout<<"Must provide a valid api key as the first argument"<<std::endl;
+			std::cout<<"Must provide a valid youtube api key as the first argument"<<std::endl;
 			exit(0xBAD);
 			break;
 
