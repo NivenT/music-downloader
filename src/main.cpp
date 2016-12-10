@@ -62,16 +62,29 @@ void download_song(const std::string& url, const std::string& title = "") {
 	}
 }
 
+std::string construct_query(const json& request) {
+	const static std::string keys[6]{"part", "topicId", "maxResults", "type", "q", "key"};
+	std::string query = "";
+
+	for (const auto key : keys) {
+		std::string value = request[key];
+		query += key + "=" + value + "&";
+	}
+	return query;
+}
+
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
-void search_youtube_for_song(const std::string& song) {
+void search_youtube_for_song(const std::string& song, const std::string& apikey) {
 	json request;
 	request["part"] = "snippet";
 	request["topicId"] = "/m/04rlf"; // music
-	request["maxResults"] = 5;
+	request["maxResults"] = "5";
 	request["type"] = "video";
 	request["q"] = song;
+	request["key"] = apikey;
 
-	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search"},
+	std::string query = construct_query(request);
+	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search?" + query},
                              cpr::Header{{"Content-Type", "application/json"}},
                              cpr::Body{request.dump()});
 
@@ -86,35 +99,35 @@ void search_youtube_for_song(const std::string& song) {
 	}
 }
 
-void set_params(int argc, char** argv, std::string& title, std::string& ytID) {
+void set_params(int argc, char** argv, std::string& apikey, std::string& song) {
 	switch(argc) {
 		case 1:
-			title = "Thats_Christmas_To_Me";
-			ytID = "pFjdfjrtf1Q";
+			std::cout<<"Must provide a valid api key as the first argument"<<std::endl;
+			exit(0xBAD);
 			break;
 
 		case 2:
-			title = "";
-			ytID = argv[1];
+			apikey = argv[1];
+			song = "Margo";
 			break;
 
 		default:
-			title = argv[2];
-			ytID = argv[1];
+			apikey = argv[1];
+			song = argv[2];
 			break;
 	}
 }
 
 int main(int argc, char** argv) {
-	/*
-	std::string title, ytID;
-	set_params(argc, argv, title, ytID);
+	std::string apikey, song;
+	set_params(argc, argv, apikey, song);
 
+	search_youtube_for_song(song, apikey);
+	/*
 	std::cout<<"Downloading "<<(title == "" ? "*will infer title*" : title)<<" (ID = "<<ytID<<")..."<<std::endl;
 	const std::string downloadUrl = youtube_to_download(ytID);
 	std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
 
 	download_song(to_http(downloadUrl), title);
 	*/
-	search_youtube_for_song("margo");
 }
