@@ -74,15 +74,19 @@ std::string construct_query(const json& request) {
 }
 
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
-void search_youtube_for_song(const std::string& song, const std::string& apikey) {
+std::vector<std::string> search_youtube_for_song(const std::string& song, const std::string& apikey) {
+	// Top result isn't guaranteed to be the correct result
+	static const int MAX_NUM_DOWNLOADS_PER_SONG = 2;
+
 	json request;
 	request["part"] = "snippet";
 	request["topicId"] = "/m/04rlf"; // music
-	request["maxResults"] = "5";
+	request["maxResults"] = std::to_string(MAX_NUM_DOWNLOADS_PER_SONG);
 	request["type"] = "video";
 	request["q"] = song;
 	request["key"] = apikey;
 
+	std::cout<<"Searching YouTube for song: \""<<song<<"\""<<std::endl;
 	std::string query = construct_query(request);
 	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search?" + query},
                              cpr::Header{{"Content-Type", "application/json"}},
@@ -92,10 +96,21 @@ void search_youtube_for_song(const std::string& song, const std::string& apikey)
 		std::cout<<"Error occured ("<<(int)response.error.code<<"):"<<std::endl
 				 <<response.error.message<<std::endl
 				 <<std::endl;
-	} else {
+		exit(0xBAD);
+	} else if (response.status_code/100 != 2) {
 		std::cout<<"YouTube response ("<<response.status_code<<"):"<<std::endl
 				 <<response.text<<std::endl
 				 <<std::endl;
+	} else {
+		json resp = json::parse(response.text);
+		std::vector<std::string> results;
+
+		int num_downloads = std::min<int>(resp["items"].size(), MAX_NUM_DOWNLOADS_PER_SONG);
+		std::cout<<"Retreiving Ids for top "<<num_downloads<<" results..."<<std::endl;
+		for (int i = 0; i < num_downloads; ++i) {
+			results.push_back(resp["items"][i]["id"]["videoId"]);
+		}
+		return results;
 	}
 }
 
@@ -122,12 +137,13 @@ int main(int argc, char** argv) {
 	std::string apikey, song;
 	set_params(argc, argv, apikey, song);
 
-	search_youtube_for_song(song, apikey);
-	/*
-	std::cout<<"Downloading "<<(title == "" ? "*will infer title*" : title)<<" (ID = "<<ytID<<")..."<<std::endl;
-	const std::string downloadUrl = youtube_to_download(ytID);
-	std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
+	std::vector<std::string> songIds = search_youtube_for_song(song, apikey);
+	for (const auto& song : songIds) {
+		std::cout<<std::endl;
+		std::cout<<"Downloading video with Id "<<song<<"..."<<std::endl;
+		const std::string downloadUrl = youtube_to_download(song);
+		std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
 
-	download_song(to_http(downloadUrl), title);
-	*/
+		download_song(to_http(downloadUrl));
+	}
 }
