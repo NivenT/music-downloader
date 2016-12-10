@@ -22,6 +22,20 @@ std::string prettify(const std::string& title) {
 	return ends_with(ret, ".mp3") ? ret : ret + ".mp3";
 }
 
+std::string urlify(const std::string& query) {
+	std::string ret = query;
+	for (int i = 0; i < ret.size(); ++i) {
+		if (ret[i] == ' ') {
+			ret[i] = '+';
+		} else if (!isascii(ret[i])) {
+			std::string code = std::to_string((int)ret[i]);
+			ret.replace(i, 1, "%" + code);
+			i += code.size();
+		}
+	}
+	return ret;
+}
+
 void write_to_mp3(const std::string& title, const std::string& data) {
 	std::string path = prettify(title);
 
@@ -83,7 +97,7 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 	request["topicId"] = "/m/04rlf"; // music
 	request["maxResults"] = std::to_string(MAX_NUM_DOWNLOADS_PER_SONG);
 	request["type"] = "video";
-	request["q"] = song;
+	request["q"] = urlify(song);
 	request["key"] = apikey;
 
 	std::cout<<"Searching YouTube for song: \""<<song<<"\""<<std::endl;
@@ -101,6 +115,7 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 		std::cout<<"YouTube response ("<<response.status_code<<"):"<<std::endl
 				 <<response.text<<std::endl
 				 <<std::endl;
+		exit(0xBAD);
 	} else {
 		json resp = json::parse(response.text);
 		std::vector<std::string> results;
@@ -109,6 +124,7 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 		std::cout<<"Retreiving Ids for top "<<num_downloads<<" results..."<<std::endl;
 		for (int i = 0; i < num_downloads; ++i) {
 			results.push_back(resp["items"][i]["id"]["videoId"]);
+			std::cout<<"    "<<resp["items"][i]["id"]["videoId"]<<" -> "<<resp["items"][i]["snippet"]["title"]<<std::endl;
 		}
 		return results;
 	}
