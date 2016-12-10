@@ -13,6 +13,14 @@ bool ends_with(const std::string& str, const std::string& suffix) {
 	return str.find_last_of(suffix) == str.size() - 1;
 }
 
+std::string prettify(const std::string& title) {
+	std::string ret = title;
+	std::transform(title.begin(), title.end(), ret.begin(), [](char c) {
+		return c==' ' ? '_' : c;
+	});
+	return ends_with(ret, ".mp3") ? ret : ret + ".mp3";
+}
+
 std::vector<std::string> split(const std::string& str, char delim) {
 	std::vector<std::string> elems;
 	std::stringstream ss(str);
@@ -25,7 +33,7 @@ std::vector<std::string> split(const std::string& str, char delim) {
 }
 
 void write_to_mp3(const std::string& title, const std::string& data) {
-	std::string path = ends_with(title, ".mp3") ? title : title + ".mp3";
+	std::string path = prettify(title);
 
 	std::cout<<"Saving song to "<<path<<std::endl;
 	std::ofstream file(path.c_str());
@@ -43,8 +51,7 @@ std::string youtube_to_download(const std::string& id) {
 
 std::string to_http(const std::string& url) {
 	return starts_with(url, "https") ? "http" + url.substr(5) :
-		   starts_with(url, "http")  ? url : 
-		   							   "http" + url;
+		   starts_with(url, "http")  ? url : "http" + url;
 }
 
 void download_song(const std::string& url, const std::string& title = "") {
@@ -53,7 +60,7 @@ void download_song(const std::string& url, const std::string& title = "") {
 	static const int MAX_NUM_REQUESTS = 10;
 	for (int i = 0; i < MAX_NUM_REQUESTS; ++i) {
 		auto response = cpr::Get(cpr::Url{url});
-		std::cout<<response.text<<std::endl;
+		std::cout<<"    resp "<<i<<": "<<response.text<<std::endl;
 
 		auto tokens = split(response.text, '|');
 		if (tokens[0] == "OK" && tokens.size() == 4) {
@@ -89,7 +96,7 @@ int main(int argc, char** argv) {
 	std::string title, ytID;
 	set_params(argc, argv, title, ytID);
 
-	std::cout<<"Downloading "<<title<<" (ID = "<<ytID<<")..."<<std::endl;
+	std::cout<<"Downloading "<<(title == "" ? "*will infer title*" : title)<<" (ID = "<<ytID<<")..."<<std::endl;
 	const std::string downloadUrl = youtube_to_download(ytID);
 	std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
 
