@@ -1,6 +1,7 @@
 #include <fstream>
 
 #include <cpr/cpr.h>
+#include <cpr/util.h>
 #include <json.hpp>
 
 using json = nlohmann::json;
@@ -19,17 +20,6 @@ std::string prettify(const std::string& title) {
 		return c==' ' ? '_' : c;
 	});
 	return ends_with(ret, ".mp3") ? ret : ret + ".mp3";
-}
-
-std::vector<std::string> split(const std::string& str, char delim) {
-	std::vector<std::string> elems;
-	std::stringstream ss(str);
-
-	std::string item;
-	while (std::getline(ss, item, delim)) {
-		elems.push_back(item);
-	}
-	return elems;
 }
 
 void write_to_mp3(const std::string& title, const std::string& data) {
@@ -62,7 +52,7 @@ void download_song(const std::string& url, const std::string& title = "") {
 		auto response = cpr::Get(cpr::Url{url});
 		std::cout<<"    resp "<<i<<": "<<response.text<<std::endl;
 
-		auto tokens = split(response.text, '|');
+		auto tokens = cpr::util::split(response.text, '|');
 		if (tokens[0] == "OK" && tokens.size() == 4) {
 			const std::string songUrl = "http://dl" + tokens[1] + ".downloader.space/dl.php?id=" + tokens[2];
 			response = cpr::Get(cpr::Url{songUrl});
@@ -71,6 +61,23 @@ void download_song(const std::string& url, const std::string& title = "") {
 			return;
 		}
 	}
+}
+
+// YouTube API https://developers.google.com/youtube/v3/docs/search/list
+void search_youtube_for_song(const std::string& song) {
+	json request;
+	request["part"] = "snippet";
+	request["topicId"] = "/m/04rlf"; // music
+	request["maxResults"] = 5;
+	request["type"] = "video";
+	request["q"] = song;
+
+	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search"},
+                              cpr::Header{{"Content-Type", "application/json"}},
+                              cpr::Body{request.dump()});
+
+	std::cout<<"YouTube response:"<<std::endl
+			 <<response.text<<std::endl;
 }
 
 void set_params(int argc, char** argv, std::string& title, std::string& ytID) {
@@ -101,4 +108,6 @@ int main(int argc, char** argv) {
 	std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
 
 	download_song(to_http(downloadUrl), title);
+
+	search_youtube_for_song("margo");
 }
