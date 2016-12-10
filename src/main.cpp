@@ -1,3 +1,5 @@
+#define INSECURE_CURL
+
 #include <fstream>
 
 #include <cpr/cpr.h>
@@ -73,8 +75,10 @@ void search_youtube_for_song(const std::string& song) {
 	request["q"] = song;
 
 	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search"},
-                              cpr::Header{{"Content-Type", "application/json"}},
-                              cpr::Body{request.dump()});
+                             cpr::Header{{"Content-Type", "application/json"}},
+                             cpr::Body{request.dump()},
+                             cpr::SSLCert{"cert.crt"},
+                             cpr::SSLKey{"private.key"});
 
 	std::cout<<"YouTube response:"<<std::endl
 			 <<response.text<<std::endl;

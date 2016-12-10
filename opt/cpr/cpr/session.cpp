@@ -33,6 +33,16 @@ class Session::Impl {
     void SetCookies(const Cookies& cookies);
     void SetBody(Body&& body);
     void SetBody(const Body& body);
+    void SetCert(SSLCert&& cert);
+    void SetCert(const SSLCert& cert);
+    void SetCertType(SSLCertType&& certType);
+    void SetCertType(const SSLCertType& certType);
+    void SetKey(SSLKey&& key);
+    void SetKey(const SSLKey& key);
+    void SetKeyType(SSLKeyType&& keyType);
+    void SetKeyType(const SSLKeyType& keyType);
+    void SetKeyPass(SSLKeyPass&& keyPass);
+    void SetKeyPass(const SSLKeyPass& keyPass);
 
     Response Delete();
     Response Get();
@@ -256,6 +266,76 @@ void Session::Impl::SetBody(const Body& body) {
     }
 }
 
+void Session::Impl::SetCert(SSLCert&& cert) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLCERT, cert.data());
+    }
+}
+
+void Session::Impl::SetCert(const SSLCert& cert) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLCERT, cert.data());
+    }
+}
+
+void Session::Impl::SetCertType(SSLCertType&& certType) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, certType.data());
+    }
+}
+
+void Session::Impl::SetCertType(const SSLCertType& certType) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, certType.data());
+    }
+}
+
+void Session::Impl::SetKey(SSLKey&& key) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLKEY, key.data());
+    }
+}
+
+void Session::Impl::SetKey(const SSLKey& key) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLKEY, key.data());
+    }
+}
+
+void Session::Impl::SetKeyType(SSLKeyType&& keyType) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, keyType.data());
+    }
+}
+
+void Session::Impl::SetKeyType(const SSLKeyType& keyType) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, keyType.data());
+    }
+}
+
+void Session::Impl::SetKeyPass(SSLKeyPass&& keyPass) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, keyPass.data());
+    }
+}
+
+void Session::Impl::SetKeyPass(const SSLKeyPass& keyPass) {
+    auto curl = curl_->handle;
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, keyPass.data());
+    }
+}
+
 Response Session::Impl::Delete() {
     auto curl = curl_->handle;
     if (curl) {
@@ -397,6 +477,16 @@ void Session::SetMaxRedirects(const long& max_redirects) { pimpl_->SetMaxRedirec
 void Session::SetCookies(const Cookies& cookies) { pimpl_->SetCookies(cookies); }
 void Session::SetBody(const Body& body) { pimpl_->SetBody(body); }
 void Session::SetBody(Body&& body) { pimpl_->SetBody(std::move(body)); }
+void Session::SetCert(const SSLCert& cert) { pimpl_->SetCert(cert); }
+void Session::SetCert(SSLCert&& cert) { pimpl_->SetCert(std::move(cert)); }
+void Session::SetCertType(const SSLCertType& certType) { pimpl_->SetCertType(certType); }
+void Session::SetCertType(SSLCertType&& certType) { pimpl_->SetCertType(std::move(certType)); }
+void Session::SetKey(const SSLKey& key) { pimpl_->SetKey(key); }
+void Session::SetKey(SSLKey&& key) { pimpl_->SetKey(std::move(key)); }
+void Session::SetKeyType(const SSLKeyType& keyType) { pimpl_->SetKeyType(keyType); }
+void Session::SetKeyType(SSLKeyType&& keyType) { pimpl_->SetKeyType(std::move(keyType)); }
+void Session::SetKeyPass(const SSLKeyPass& keyPass) { pimpl_->SetKeyPass(keyPass); }
+void Session::SetKeyPass(SSLKeyPass&& keyPass) { pimpl_->SetKeyPass(std::move(keyPass)); }
 void Session::SetOption(const Url& url) { pimpl_->SetUrl(url); }
 void Session::SetOption(const Parameters& parameters) { pimpl_->SetParameters(parameters); }
 void Session::SetOption(Parameters&& parameters) { pimpl_->SetParameters(std::move(parameters)); }
@@ -415,6 +505,16 @@ void Session::SetOption(const long& max_redirects) { pimpl_->SetMaxRedirects(max
 void Session::SetOption(const Cookies& cookies) { pimpl_->SetCookies(cookies); }
 void Session::SetOption(const Body& body) { pimpl_->SetBody(body); }
 void Session::SetOption(Body&& body) { pimpl_->SetBody(std::move(body)); }
+void Session::SetOption(const SSLCert& cert) { pimpl_->SetCert(cert); }
+void Session::SetOption(SSLCert&& cert) { pimpl_->SetCert(std::move(cert)); }
+void Session::SetOption(const SSLCertType& certType) { pimpl_->SetCertType(certType); }
+void Session::SetOption(SSLCertType&& certType) { pimpl_->SetCertType(std::move(certType)); }
+void Session::SetOption(const SSLKey& key) { pimpl_->SetKey(key); }
+void Session::SetOption(SSLKey&& key) { pimpl_->SetKey(std::move(key)); }
+void Session::SetOption(const SSLKeyType& keyType) { pimpl_->SetKeyType(keyType); }
+void Session::SetOption(SSLKeyType&& keyType) { pimpl_->SetKeyType(std::move(keyType)); }
+void Session::SetOption(const SSLKeyPass& keyPass) { pimpl_->SetKeyPass(keyPass); }
+void Session::SetOption(SSLKeyPass&& keyPass) { pimpl_->SetKeyPass(std::move(keyPass)); }
 Response Session::Delete() { return pimpl_->Delete(); }
 Response Session::Get() { return pimpl_->Get(); }
 Response Session::Head() { return pimpl_->Head(); }
