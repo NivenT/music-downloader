@@ -1,5 +1,3 @@
-#define INSECURE_CURL
-
 #include <fstream>
 
 #include <cpr/cpr.h>
@@ -19,7 +17,7 @@ bool ends_with(const std::string& str, const std::string& suffix) {
 std::string prettify(const std::string& title) {
 	std::string ret = title;
 	std::transform(title.begin(), title.end(), ret.begin(), [](char c) {
-		return c==' ' ? '_' : c;
+		return c == ' ' ? '_' : c;
 	});
 	return ends_with(ret, ".mp3") ? ret : ret + ".mp3";
 }
@@ -47,9 +45,8 @@ std::string to_http(const std::string& url) {
 }
 
 void download_song(const std::string& url, const std::string& title = "") {
-	// I think it sometimes takes multiple requests for the song to finish downloading
-	// Could be wrong. Here in the mean time just in case
-	static const int MAX_NUM_REQUESTS = 10;
+	// It sometimes takes multiple requests for the song to finish downloading
+	static const int MAX_NUM_REQUESTS = 50;
 	for (int i = 0; i < MAX_NUM_REQUESTS; ++i) {
 		auto response = cpr::Get(cpr::Url{url});
 		std::cout<<"    resp "<<i<<": "<<response.text<<std::endl;
@@ -76,12 +73,17 @@ void search_youtube_for_song(const std::string& song) {
 
 	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search"},
                              cpr::Header{{"Content-Type", "application/json"}},
-                             cpr::Body{request.dump()},
-                             cpr::SSLCert{"cert.crt"},
-                             cpr::SSLKey{"private.key"});
+                             cpr::Body{request.dump()});
 
-	std::cout<<"YouTube response:"<<std::endl
-			 <<response.text<<std::endl;
+	if (!response.status_code) {
+		std::cout<<"Error occured ("<<(int)response.error.code<<"):"<<std::endl
+				 <<response.error.message<<std::endl
+				 <<std::endl;
+	} else {
+		std::cout<<"YouTube response ("<<response.status_code<<"):"<<std::endl
+				 <<response.text<<std::endl
+				 <<std::endl;
+	}
 }
 
 void set_params(int argc, char** argv, std::string& title, std::string& ytID) {
@@ -104,6 +106,7 @@ void set_params(int argc, char** argv, std::string& title, std::string& ytID) {
 }
 
 int main(int argc, char** argv) {
+	/*
 	std::string title, ytID;
 	set_params(argc, argv, title, ytID);
 
@@ -112,6 +115,6 @@ int main(int argc, char** argv) {
 	std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
 
 	download_song(to_http(downloadUrl), title);
-
+	*/
 	search_youtube_for_song("margo");
 }

@@ -14,7 +14,6 @@
 #include "proxies.h"
 #include "response.h"
 #include "timeout.h"
-#include "ssl.h"
 
 namespace cpr {
 
@@ -41,16 +40,6 @@ class Session {
     void SetCookies(const Cookies& cookies);
     void SetBody(Body&& body);
     void SetBody(const Body& body);
-    void SetCert(SSLCert&& cert);
-    void SetCert(const SSLCert& cert);
-    void SetCertType(SSLCertType&& certType);
-    void SetCertType(const SSLCertType& certType);
-    void SetKey(SSLKey&& key);
-    void SetKey(const SSLKey& key);
-    void SetKeyType(SSLKeyType&& keyType);
-    void SetKeyType(const SSLKeyType& keyType);
-    void SetKeyPass(SSLKeyPass&& keyPass);
-    void SetKeyPass(const SSLKeyPass& keyPass);
 
     // Used in templated functions
     void SetOption(const Url& url);
@@ -71,16 +60,6 @@ class Session {
     void SetOption(const Cookies& cookies);
     void SetOption(Body&& body);
     void SetOption(const Body& body);
-    void SetOption(SSLCert&& cert);
-    void SetOption(const SSLCert& cert);
-    void SetOption(SSLCertType&& certType);
-    void SetOption(const SSLCertType& certType);
-    void SetOption(SSLKey&& key);
-    void SetOption(const SSLKey& key);
-    void SetOption(SSLKeyType&& keyType);
-    void SetOption(const SSLKeyType& keyType);
-    void SetOption(SSLKeyPass&& keyPass);
-    void SetOption(const SSLKeyPass& keyPass);
 
     Response Delete();
     Response Get();
