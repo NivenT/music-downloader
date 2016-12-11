@@ -1,3 +1,5 @@
+#define TAB "  "
+
 #include <fstream>
 
 #include <cpr/cpr.h>
@@ -27,8 +29,8 @@ std::string urlify(const std::string& query) {
 	for (int i = 0; i < ret.size(); ++i) {
 		if (ret[i] == ' ') {
 			ret[i] = '+';
-		} else if (!isascii(ret[i])) {
-			std::string code = std::to_string((int)ret[i]);
+		} else if (!isalpha(ret[i])) {
+			std::string code = std::to_string((unsigned char)ret[i]);
 			ret.replace(i, 1, "%" + code);
 			i += code.size();
 		}
@@ -39,7 +41,7 @@ std::string urlify(const std::string& query) {
 void write_to_mp3(const std::string& title, const std::string& data) {
 	std::string path = fileify(title);
 
-	std::cout<<"Saving song to "<<path<<std::endl;
+	std::cout<<TAB<<"Saving song to "<<path<<std::endl;
 	std::ofstream file(path.c_str());
 
 	file.write(data.c_str(), data.size());
@@ -58,33 +60,47 @@ std::string to_http(const std::string& url) {
 		   starts_with(url, "http")  ? url : "http" + url;
 }
 
-void download_song(const std::string& url, const std::string& title = "") {
+void download_song(const std::string& url, const std::string& saveFolder = "") {
 	// It sometimes takes multiple requests for the song to finish downloading
 	static const int MAX_NUM_REQUESTS = 50;
 	for (int i = 0; i < MAX_NUM_REQUESTS; ++i) {
 		auto response = cpr::Get(cpr::Url{url});
-		std::cout<<"    resp "<<i<<": "<<response.text<<std::endl;
+		std::cout<<TAB<<TAB<<"resp "<<i<<": "<<response.text<<std::endl;
 
 		auto tokens = cpr::util::split(response.text, '|');
-		if (tokens[0] == "OK" && tokens.size() == 4) {
+		if (tokens[0] == "OK" && tokens.size() >= 4) {
 			const std::string songUrl = "http://dl" + tokens[1] + ".downloader.space/dl.php?id=" + tokens[2];
 			response = cpr::Get(cpr::Url{songUrl});
 
-			write_to_mp3(title == "" ? tokens[3] : title, response.text);
+			write_to_mp3(saveFolder + (ends_with(saveFolder, "/") ? "" : "/") + tokens[3], response.text);
 			return;
 		}
 	}
 }
 
-std::string construct_query(const json& request) {
-	const static std::string keys[6]{"part", "topicId", "maxResults", "type", "q", "key"};
+std::string construct_query(const json& request, const std::vector<std::string>& keys) {
 	std::string query = "";
-
 	for (const auto key : keys) {
 		std::string value = request[key];
 		query += key + "=" + value + "&";
 	}
 	return query;
+}
+
+// Is server even the right name for that argument?
+bool check_successful_response(const cpr::Response& response, const std::string& server) {
+	if (!response.status_code) {
+		std::cout<<"Error occured ("<<(int)response.error.code<<"):"<<std::endl
+				 <<response.error.message<<std::endl
+				 <<std::endl;
+		exit(0xBAD);
+	} else if (response.status_code/100 != 2) {
+		std::cout<<server<<" response ("<<response.status_code<<"):"<<std::endl
+				 <<response.text<<std::endl
+				 <<std::endl;
+		exit(0xBAD);
+	}
+	return true;
 }
 
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
@@ -101,22 +117,12 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 	request["key"] = apikey;
 
 	std::cout<<"Searching YouTube for song: \""<<song<<"\""<<std::endl;
-	std::string query = construct_query(request);
-	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search?" + query},
-                             cpr::Header{{"Content-Type", "application/json"}},
-                             cpr::Body{request.dump()});
+	std::cout<<"Song title in url: "<<request["q"]<<std::endl;
 
-	if (!response.status_code) {
-		std::cout<<"Error occured ("<<(int)response.error.code<<"):"<<std::endl
-				 <<response.error.message<<std::endl
-				 <<std::endl;
-		exit(0xBAD);
-	} else if (response.status_code/100 != 2) {
-		std::cout<<"YouTube response ("<<response.status_code<<"):"<<std::endl
-				 <<response.text<<std::endl
-				 <<std::endl;
-		exit(0xBAD);
-	} else {
+	std::string query = construct_query(request, {"part", "topicId", "maxResults", "type", "q", "key"});
+	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search?" + query});
+
+	if (check_successful_response(response, "YouTube")) {
 		json resp = json::parse(response.text);
 		std::vector<std::string> results;
 
@@ -130,7 +136,7 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 	}
 }
 
-void set_params(int argc, char** argv, std::string& apikey, std::string& song) {
+void set_params(int argc, char** argv, std::string& apikey, std::string& songList, std::string& saveFolder) {
 	switch(argc) {
 		case 1:
 			std::cout<<"Must provide a valid youtube api key as the first argument"<<std::endl;
@@ -139,27 +145,42 @@ void set_params(int argc, char** argv, std::string& apikey, std::string& song) {
 
 		case 2:
 			apikey = argv[1];
-			song = "Margo";
+			songList = "songs.txt";
+			saveFolder = "songs";
+			break;
+
+		case 3:
+			apikey = argv[1];
+			songList = argv[2];
+			saveFolder = "songs";
 			break;
 
 		default:
 			apikey = argv[1];
-			song = argv[2];
+			songList = argv[2];
+			saveFolder = argv[3];
 			break;
 	}
 }
 
-int main(int argc, char** argv) {
-	std::string apikey, song;
-	set_params(argc, argv, apikey, song);
+void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder) {
+	std::ifstream songFile(songList.c_str());
 
-	std::vector<std::string> songIds = search_youtube_for_song(song, apikey);
-	for (const auto& song : songIds) {
+	std::string song;
+	while (std::getline(songFile, song)) {
+		for (const auto& songId : search_youtube_for_song(song, apikey)) {
+			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
+			const std::string downloadUrl = youtube_to_download(songId);
+			std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
+			download_song(to_http(downloadUrl), saveFolder);
+			std::cout<<std::endl;
+		}
 		std::cout<<std::endl;
-		std::cout<<"Downloading video with Id "<<song<<"..."<<std::endl;
-		const std::string downloadUrl = youtube_to_download(song);
-		std::cout<<"Donwload url: "<<downloadUrl<<std::endl;
-
-		download_song(to_http(downloadUrl));
 	}
+}
+
+int main(int argc, char** argv) {
+	std::string apikey, songList, saveFolder;
+	set_params(argc, argv, apikey, songList, saveFolder);
+	download_songs(apikey, songList, saveFolder);
 }
