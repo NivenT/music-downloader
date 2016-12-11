@@ -39,6 +39,6 @@ endif()
 
 add_subdirectory(opt)
 
-add_executable(spotify-downloader src/main.cpp)
+add_executable(spotify-downloader src/main.cpp src/util.cpp src/download.cpp)
 target_link_libraries(spotify-downloader ${CPR_LIBRARIES})
-include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS})
+include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS} include)
