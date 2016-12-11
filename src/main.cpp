@@ -29,7 +29,10 @@ std::string urlify(const std::string& query) {
 	for (int i = 0; i < ret.size(); ++i) {
 		if (ret[i] == ' ') {
 			ret[i] = '+';
-		} else if (!isalpha(ret[i])) {
+		} else if (ret[i] == '\'') {
+			ret.replace(i, 1, "%27");
+			i += 2;
+		} else if (!isalpha(ret[i]) && ret[i] != '-') {
 			std::string code = std::to_string((unsigned char)ret[i]);
 			ret.replace(i, 1, "%" + code);
 			i += code.size();
@@ -62,7 +65,7 @@ std::string to_http(const std::string& url) {
 
 void download_song(const std::string& url, const std::string& saveFolder = "") {
 	// It sometimes takes multiple requests for the song to finish downloading
-	static const int MAX_NUM_REQUESTS = 50;
+	static const int MAX_NUM_REQUESTS = 100;
 	for (int i = 0; i < MAX_NUM_REQUESTS; ++i) {
 		auto response = cpr::Get(cpr::Url{url});
 		std::cout<<TAB<<TAB<<"resp "<<i<<": "<<response.text<<std::endl;
@@ -130,7 +133,7 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 		std::cout<<"Retreiving Ids for top "<<num_downloads<<" results..."<<std::endl;
 		for (int i = 0; i < num_downloads; ++i) {
 			results.push_back(resp["items"][i]["id"]["videoId"]);
-			std::cout<<"    "<<resp["items"][i]["id"]["videoId"]<<" -> "<<resp["items"][i]["snippet"]["title"]<<std::endl;
+			std::cout<<TAB<<TAB<<resp["items"][i]["id"]["videoId"]<<" -> "<<resp["items"][i]["snippet"]["title"]<<std::endl;
 		}
 		return results;
 	}
@@ -168,6 +171,7 @@ void download_songs(const std::string& apikey, const std::string& songList, cons
 
 	std::string song;
 	while (std::getline(songFile, song)) {
+		if (starts_with(song, "added on:")) continue;
 		for (const auto& songId : search_youtube_for_song(song, apikey)) {
 			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
 			const std::string downloadUrl = youtube_to_download(songId);
