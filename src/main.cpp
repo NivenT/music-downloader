@@ -71,7 +71,7 @@ void download_song(const std::string& url, const std::string& saveFolder = "") {
 		std::cout<<TAB<<TAB<<"resp "<<i<<": "<<response.text<<std::endl;
 
 		auto tokens = cpr::util::split(response.text, '|');
-		if (tokens[0] == "OK" && tokens.size() >= 4) {
+		if (tokens.size() >= 4 && tokens[0] == "OK") {
 			const std::string songUrl = "http://dl" + tokens[1] + ".downloader.space/dl.php?id=" + tokens[2];
 			response = cpr::Get(cpr::Url{songUrl});
 
