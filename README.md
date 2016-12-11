@@ -26,6 +26,11 @@ Up to three parameters can be specified (the first is required, the last two opt
 * song file - A text file containing a list of songs to download (defualt: songs.txt)
 * song folder - The directory to save the downloaded song to (defualt: songs/)
 
+## Details
+- The program downloads the top 2 results for each song
+- Sometimes, neither of the top 2 results are the song you wanted to download
+- Sometimes, no results are found for your song
+
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do
 - [ ] Add --help flag
