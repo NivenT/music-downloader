@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.7)
-project(spotify-downloader)
+project(music-downloader)
 
 if(NOT ${CMAKE_VERSION} LESS 3.2)
     set(CMAKE_CXX_STANDARD 11)
@@ -40,5 +40,5 @@ endif()
 add_subdirectory(opt)
 
 add_executable(music-downloader src/main.cpp src/util.cpp src/download.cpp)
-target_link_libraries(spotify-downloader ${CPR_LIBRARIES})
+target_link_libraries(music-downloader ${CPR_LIBRARIES})
 include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS} include)
