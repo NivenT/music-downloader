@@ -66,14 +66,14 @@ bool check_successful_response(const cpr::Response& response, const std::string&
 }
 
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
-std::vector<std::string> search_youtube_for_song(const std::string& song, const std::string& apikey) {
+std::string search_youtube_for_song(const std::string& song, const std::string& apikey) {
 	// Top result isn't guaranteed to be the correct result
-	static const int MAX_NUM_DOWNLOADS_PER_SONG = 2;
+	static const int MAX_NUM_RESULTS_PER_SONG = 3;
 
 	json request;
 	request["part"] = "snippet";
 	request["topicId"] = "/m/04rlf"; // music
-	request["maxResults"] = std::to_string(MAX_NUM_DOWNLOADS_PER_SONG);
+	request["maxResults"] = std::to_string(MAX_NUM_RESULTS_PER_SONG);
 	request["type"] = "video";
 	request["q"] = urlify(song);
 	request["key"] = apikey;
@@ -86,14 +86,27 @@ std::vector<std::string> search_youtube_for_song(const std::string& song, const 
 
 	if (check_successful_response(response, "YouTube")) {
 		json resp = json::parse(response.text);
-		std::vector<std::string> results;
 
-		int num_downloads = std::min<int>(resp["items"].size(), MAX_NUM_DOWNLOADS_PER_SONG);
+		int num_downloads = std::min<int>(resp["items"].size(), MAX_NUM_RESULTS_PER_SONG);
 		std::cout<<"Retreiving Ids for top "<<num_downloads<<" results..."<<std::endl;
+		
+		float lowest_dist = 1.0;
+		std::string winner = "";
+		json winner_title = "";
+
 		for (int i = 0; i < num_downloads; ++i) {
-			results.push_back(resp["items"][i]["id"]["videoId"]);
-			std::cout<<TAB<<TAB<<resp["items"][i]["id"]["videoId"]<<" -> "<<resp["items"][i]["snippet"]["title"]<<std::endl;
+			json videoId = resp["items"][i]["id"]["videoId"];
+			json title = resp["items"][i]["snippet"]["title"];
+			float dist = title_distance(song, title);
+
+			std::cout<<TAB<<videoId<<" -> "<<title<<" ("<<dist<<")"<<std::endl;
+
+			winner = dist < lowest_dist ? videoId.get<std::string>() : winner;
+			winner_title = dist < lowest_dist ? title : winner_title;
+			lowest_dist = std::min(dist, lowest_dist);
 		}
-		return results;
+		std::cout<<"The following video was chosen: "<<winner_title<<std::endl;
+		return winner;
 	}
+	return "";
 }

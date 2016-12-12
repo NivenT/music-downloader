@@ -7,4 +7,4 @@ extern std::string youtube_to_download(const std::string& id);
 extern void download_song(const std::string& url, const std::string& saveFolder = "");
 extern std::string construct_query(const nlohmann::json& request, const std::vector<std::string>& keys);
 extern bool check_successful_response(const cpr::Response& response, const std::string& server);
-extern std::vector<std::string> search_youtube_for_song(const std::string& song, const std::string& apikey);
+extern std::string search_youtube_for_song(const std::string& song, const std::string& apikey);

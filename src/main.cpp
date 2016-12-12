@@ -37,12 +37,18 @@ void download_songs(const std::string& apikey, const std::string& songList, cons
 	std::string song;
 	while (std::getline(songFile, song)) {
 		if (starts_with(song, "added on:")) continue;
-		for (const auto& songId : search_youtube_for_song(song, apikey)) {
+
+		std::string songId = search_youtube_for_song(song, apikey);
+
+		if (songId == "") {
+			std::cout<<song<<" could not be found"<<std::endl;
+		} else {
 			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
+
 			const std::string downloadUrl = youtube_to_download(songId);
 			std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
+
 			download_song(to_http(downloadUrl), saveFolder);
-			std::cout<<std::endl;
 		}
 		std::cout<<std::endl;
 	}
