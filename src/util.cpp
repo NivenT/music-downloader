@@ -32,7 +32,7 @@ std::string urlify(const std::string& query) {
 		} else if (ret[i] == '\'') {
 			ret.replace(i, 1, "%27");
 			i += 2;
-		} else if (!isalpha(ret[i]) && STATIC_CHARS.find(ret[i]) == STATIC_CHARS.end()) {
+		} else if (!isalnum(ret[i]) && STATIC_CHARS.find(ret[i]) == STATIC_CHARS.end()) {
 			std::string code = std::to_string((unsigned char)ret[i]);
 			ret.replace(i, 1, "%" + code);
 			i += code.size();
