@@ -23,7 +23,7 @@ std::string fileify(const std::string& title) {
 }
 
 std::string urlify(const std::string& query) {
-	static const std::unordered_set<char> STATIC_CHARS{'-', '.'};
+	static const std::unordered_set<char> STATIC_CHARS{'-', '.', '(', ')'};
 
 	std::string ret = query;
 	for (int i = 0; i < ret.size(); ++i) {
