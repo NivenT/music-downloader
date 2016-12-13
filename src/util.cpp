@@ -101,6 +101,7 @@ float num_words_in_common(const std::string& str1, const std::string& str2) {
 	return count;
 }
 
+// Idea for further improvements: Ignore words like "official" and "lyrics"
 float title_distance(const std::string& str1, const std::string& str2) {
 	return (levenshtein(str1, str2)-2*num_words_in_common(str1, str2))/std::max(str1.size(), str2.size());
 }
