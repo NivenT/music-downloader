@@ -1,4 +1,5 @@
 # Music Downloader
+[![Build Status](https://travis-ci.org/NivenT/music-downloader.svg?branch=master)](https://travis-ci.org/NivenT/music-downloader)
 
 Automatically downloads music
 
