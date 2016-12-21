@@ -1,11 +1,12 @@
 # Music Downloader
+[![Build Status](https://travis-ci.org/NivenT/music-downloader.svg?branch=master)](https://travis-ci.org/NivenT/music-downloader)
 
 Automatically downloads music
 
 This is a simple program to download music for you. You provide it a file containing a list of songs (one title per line). It searches for them on youtube, and then uses a youtube -> mp3 converter to download them as .mp3 files to a directory of your choice.
 
 ## How to Build
-To build, clone this repository and build using cmake and make. The commands you need to run should be similar to those below
+To build, clone this repository and then use cmake and make. The commands you need to run should be similar to those below
 ```
 git clone https://github.com/NivenT/music-downloader
 cd music-downloader
