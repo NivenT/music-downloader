@@ -58,4 +58,6 @@ int main(int argc, char** argv) {
 	std::string apikey, songList, saveFolder;
 	set_params(argc, argv, apikey, songList, saveFolder);
 	download_songs(apikey, songList, saveFolder);
+
+	return 0;
 }
