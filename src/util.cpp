@@ -14,6 +14,14 @@ bool ends_with(const std::string& str, const std::string& suffix) {
 	return str.find_last_of(suffix) == str.size() - 1;
 }
 
+std::string to_hex(unsigned char c) {
+	static const auto lambda = [](int digit) {
+		// This feels like overkill
+		return std::string(1, digit < 10 ? '0' + digit : 'A' + digit - 10);
+	};
+	return lambda(c/16) + lambda(c%16);
+}
+
 std::string fileify(const std::string& title) {
 	std::string ret = title;
 	std::transform(title.begin(), title.end(), ret.begin(), [](char c) {
@@ -23,19 +31,16 @@ std::string fileify(const std::string& title) {
 }
 
 std::string urlify(const std::string& query) {
-	static const std::unordered_set<char> STATIC_CHARS{'-', '.', '(', ')'};
+	static const std::unordered_set<char> SPECIAL_CHARS{'&', '/', ',', '$', '!', '?', ':', '=', '[', ']', '+', '(', ')', '\\', '{', '}', '\''};
 
 	std::string ret = query;
 	for (int i = 0; i < ret.size(); ++i) {
 		if (ret[i] == ' ') {
 			ret[i] = '+';
-		} else if (ret[i] == '\'') {
-			ret.replace(i, 1, "%27");
-			i += 2;
-		} else if (!isalnum(ret[i]) && STATIC_CHARS.find(ret[i]) == STATIC_CHARS.end()) {
-			std::string code = std::to_string((unsigned char)ret[i]);
-			ret.replace(i, 1, "%" + code);
-			i += code.size();
+		} else if (SPECIAL_CHARS.find(ret[i]) != SPECIAL_CHARS.end()) {
+			std::string hex = to_hex(ret[i]);
+			ret.replace(i, 1, "%" + hex);
+			i += hex.size();
 		}
 	}
 	return ret;
