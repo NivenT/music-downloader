@@ -1,39 +1,28 @@
 #include <iostream>
 #include <fstream>
 
+#include <docopt.h>
+
 #include "util.h"
 #include "web.h"
 #include "youtube.h"
 
-void set_params(int argc, char** argv, std::string& apikey, std::string& songList, std::string& saveFolder) {
-	switch(argc) {
-		case 1:
-			apikey = "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc";
-			songList = "songs.txt";
-			saveFolder = "songs";
-			break;
+static const char* USAGE =
+R"({progName}
 
-		case 2:
-			apikey = argv[1];
-			songList = "songs.txt";
-			saveFolder = "songs";
-			break;
+Usage:
+  {progName} (-h | --help)
+  {progName} [--songs FILE] [--dest FOLDER]
 
-		case 3:
-			apikey = argv[1];
-			songList = argv[2];
-			saveFolder = "songs";
-			break;
-
-		default:
-			apikey = argv[1];
-			songList = argv[2];
-			saveFolder = argv[3];
-			break;
-	}
-}
+Options:
+  -h --help         Prints this message.
+  --songs FILE      Text file containing songs to download [default: songs.txt]
+  --dest FOLDER	    Destination folder (where downloaded songs are saved) [default: songs/]
+)";
 
 void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder) {
+	std::cout<<"Downloading songs from file "<<songList<<" and saving them in folder "<<saveFolder<<std::endl;
+
 	std::ifstream songFile(songList.c_str());
 
 	std::string song;
@@ -61,8 +50,14 @@ void download_songs(const std::string& apikey, const std::string& songList, cons
 }
 
 int main(int argc, char** argv) {
-	std::string apikey, songList, saveFolder;
-	set_params(argc, argv, apikey, songList, saveFolder);
+	std::map<std::string, docopt::value> args =
+		docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
+		               {argv+1, argv+argc});
+
+
+	std::string apikey = "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc", 
+				songList = args["--songs"].asString(), 
+				saveFolder = args["--dest"].asString();
 	download_songs(apikey, songList, saveFolder + (ends_with(saveFolder, "/") ? "" : "/"));
 
 	return 0;

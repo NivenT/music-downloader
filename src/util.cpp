@@ -16,6 +16,17 @@ bool ends_with(const std::string& str, const std::string& suffix) {
 	return str.find_last_of(suffix) == str.size() - 1;
 }
 
+std::string replace_all(const std::string& str, const std::string o, const std::string n) {
+	std::string ret = str;
+
+	int pos = 0;
+	while ((pos = ret.find(o, pos)) != std::string::npos) {
+		ret.replace(pos, o.size(), n);
+		pos += n.size();
+	}
+	return ret;
+}
+
 std::string to_hex(unsigned char c) {
 	static const auto lambda = [](int digit) {
 		// This feels like overkill

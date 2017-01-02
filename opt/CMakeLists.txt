@@ -1,4 +1,5 @@
 set(JSON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/json/src PARENT_SCOPE)
+set(DOCOPT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/docopt PARENT_SCOPE)
 
 if(WIN32)
     option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" OFF)
@@ -10,3 +11,5 @@ if(CURL_FOUND)
     set(USE_SYSTEM_CURL ON CACHE BOOL "Use the system curl for faster builds")
 endif()
 add_subdirectory(cpr)
+
+add_subdirectory(docopt)

@@ -4,3 +4,6 @@
 [submodule "opt/json"]
 	path = opt/json
 	url = git://github.com/nlohmann/json.git
+[submodule "opt/docopt"]
+	path = opt/docopt
+	url = https://github.com/docopt/docopt.cpp
