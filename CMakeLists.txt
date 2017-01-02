@@ -39,6 +39,6 @@ endif()
 
 add_subdirectory(opt)
 
-add_executable(music-downloader src/main.cpp src/util.cpp src/download.cpp)
+add_executable(music-downloader src/main.cpp src/util.cpp src/youtube.cpp src/web.cpp)
 target_link_libraries(music-downloader ${CPR_LIBRARIES})
-include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS} include)
+include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS} include opt/optionparser)

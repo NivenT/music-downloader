@@ -1,19 +1,10 @@
 #include <fstream>
 
 #include "util.h"
-#include "download.h"
+#include "web.h"
+#include "youtube.h"
 
 using json = nlohmann::json;
-
-void write_to_mp3(const std::string& title, const std::string& data) {
-	std::string path = fileify(title);
-
-	std::cout<<TAB<<"Saving song to "<<path<<std::endl;
-	std::ofstream file(path.c_str());
-
-	file.write(data.c_str(), data.size());
-	file.close();
-}
 
 std::string youtube_to_download(const std::string& id) {
 	const static std::string BASE = "http://api.convert2mp3.cc/check.php?api=true&v=";
@@ -22,51 +13,8 @@ std::string youtube_to_download(const std::string& id) {
 	return BASE + id + "&h=" + std::to_string(rand);
 }
 
-void download_song(const std::string& url, const std::string& saveFolder) {
-	// It sometimes takes multiple requests for the song to finish downloading
-	static const int MAX_NUM_REQUESTS = 100;
-	for (int i = 0; i < MAX_NUM_REQUESTS; ++i) {
-		auto response = cpr::Get(cpr::Url{url});
-		std::cout<<TAB<<TAB<<"resp "<<i<<": "<<response.text<<std::endl;
-
-		auto tokens = cpr::util::split(response.text, '|');
-		if (tokens.size() >= 4 && tokens[0] == "OK") {
-			const std::string songUrl = "http://dl" + tokens[1] + ".downloader.space/dl.php?id=" + tokens[2];
-			response = cpr::Get(cpr::Url{songUrl});
-
-			write_to_mp3(saveFolder + (ends_with(saveFolder, "/") ? "" : "/") + tokens[3], response.text);
-			return;
-		}
-	}
-}
-
-std::string construct_query(const json& request, const std::vector<std::string>& keys) {
-	std::string query = "";
-	for (const auto key : keys) {
-		std::string value = request[key];
-		query += key + "=" + value + "&";
-	}
-	return query;
-}
-
-// Is server even the right name for that argument?
-bool check_successful_response(const cpr::Response& response, const std::string& server) {
-	if (!response.status_code) {
-		std::cout<<"Error occured ("<<(int)response.error.code<<"):"<<std::endl
-				 <<response.error.message<<std::endl
-				 <<std::endl;
-		exit(0xBAD);
-	} else if (response.status_code/100 != 2) {
-		std::cout<<server<<" response ("<<response.status_code<<"):"<<std::endl
-				 <<response.text<<std::endl
-				 <<std::endl;
-		exit(0xBAD);
-	}
-	return true;
-}
-
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
-std::string search_youtube_for_song(const std::string& song, const std::string& apikey) {
+std::tuple<std::string, std::string> search_youtube_for_song(const std::string& song, const std::string& apikey) {
 	// Top result isn't guaranteed to be the correct result
 	static const int MAX_NUM_RESULTS_PER_SONG = 3;
 
@@ -106,7 +54,7 @@ std::string search_youtube_for_song(const std::string& song, const std::string& 
 			lowest_dist = std::min(dist, lowest_dist);
 		}
 		std::cout<<"The following video was chosen: "<<winner_title<<std::endl;
-		return winner;
+		return std::make_tuple(winner, winner_title.get<std::string>());
 	}
-	return "";
+	return std::make_tuple("", "");
 }
