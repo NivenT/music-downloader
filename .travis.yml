@@ -38,9 +38,9 @@ addons:
 
 before_script:
   - sudo apt-get install software-properties-common
-  - sudo add-apt-repository ppa:george-edison55/cmake-3.x
-  - sudo apt-get update
-  - sudo apt-get upgrade
+  - sudo add-apt-repository ppa:george-edison55/cmake-3.x --yes
+  - sudo apt-get update --yes
+  - sudo apt-get upgrade --yes
   # The above installs a later version of cmake
   - export CXX=$COMPILER CC=$CCOMPILER
   - cmake --version
