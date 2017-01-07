@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 #include <unordered_set>
+#include <iomanip>
 
 #include <cpr/util.h>
 
@@ -25,6 +26,15 @@ std::string replace_all(const std::string& str, const std::string o, const std::
 		pos += n.size();
 	}
 	return ret;
+}
+
+std::string trim(const std::string& str) {
+	static const std::string whitespace = " \t\n";
+
+	auto begin = str.find_first_not_of(whitespace);
+	auto end = str.find_last_not_of(whitespace);
+
+	return str.substr(begin, end-begin+1);
 }
 
 std::string to_hex(unsigned char c) {
@@ -128,6 +138,14 @@ void write_to_mp3(const std::string& title, const std::string& data) {
 	std::string path = fileify(title);
 
 	std::cout<<TAB<<"Saving song to "<<path<<std::endl;
+	std::ofstream file(path.c_str());
+
+	file.write(data.c_str(), data.size());
+	file.close();
+}
+
+void save_lyrics(const std::string& path, const std::string& data) {
+	std::cout<<"Writing lyrics to "<<path<<std::endl;
 	std::ofstream file(path.c_str());
 
 	file.write(data.c_str(), data.size());
