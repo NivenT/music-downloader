@@ -17,26 +17,36 @@ make
 ```
 
 ## How to Run
-Run the program from terminal
+Run the program from terminal. The usage is as follows:
 ```
-./music-downloader <apikey> <song file> <song folder>
-```
-Up to three parameters can be specified (the first is required, the last two optional)
+./music-downloader
 
-* apikey - A valid YouTube API key
-* song file - A text file containing a list of songs to download (defualt: songs.txt)
-* song folder - The directory to save the downloaded song to (defualt: songs/)
+Usage:
+  ./music-downloader (-h | --help)
+  ./music-downloader [--songs FILE] [--dest FOLDER]
+  ./music-downloader --lyrics SONG [--save FILE] [--hide]
+
+Options:
+  -h --help         Prints this message.
+  --songs FILE      Text file containing songs to download [default: songs.txt]
+  --dest FOLDER	    Destination folder (where downloaded songs are saved) [default: songs/]
+  --lyrics SONG     Name of song to find the lyrics of [default: ]
+  --save FILE       File to save the lyrics to [default: ]
+  --hide            Doesn't print the lyrics to the terminal
+
+```
+Examples include
+
+* `./music-downloader` - This will download all the songs in songs.txt and save them in a folder named songs
+* `./music-downloader --lyrics "Thriller"` - This will search for the song Thriller and print its lyrics
 
 ## Details
 - The program retrieves the top 3 results for each song, and selects one to download
-- Sometimes, none of the top 3 results are the song you wanted
-- Sometimes, no results are found for your song
-- Sometimes, the wrong song is chosen
-- Most of the time, the correct song is found and downloaded
+- Lyrics searching is still a work in progress
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do
-- [ ] Add --help flag
-- [ ] Add flags for specifying certain parameters so, for example, you can change the folder without chaning the file
-- [ ] Add more parameters
+- [X] Add --help flag
+- [X] Add flags for specifying certain parameters so, for example, you can change the folder without chaning the file
+- [X] Add more parameters
 - [ ] Add ability to supply Spotify credentials in order for program to download your saved songs (Not sure if I'll ever get around to this)
