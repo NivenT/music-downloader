@@ -65,15 +65,16 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 	bool found = false;
 	std::string lyrics;
 	for (const auto& url : links) {
+		found = true;
 		if (url.find("metrolyrics") != std::string::npos) {
 			lyrics = get_metrolyrics(url);
-			found = true;
 			break;
 		} else if (url.find("azlyrics") != std::string::npos) {
 			// TODO
 		} else if (url.find("musixmatch") != std::string::npos) {
 			// TODO
 		}
+		found = false;
 	}
 
 	if (!found) {
