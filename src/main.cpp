@@ -44,11 +44,18 @@ void download_songs(const std::string& apikey, const std::string& songList, cons
 			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
 
 			const std::string downloadUrl = youtube_to_download(songId);
+			if (downloadUrl == "") {
+				std::cout<<"Could not find song"<<std::endl
+						 <<std::endl;
+				continue;
+			}
+
 			std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
 
-			std::string songData = download_song(to_http(downloadUrl), saveFolder);
+			std::string songData = download_song(downloadUrl);
 			if (songData != "") {
-			  write_to_mp3(saveFolder + songTitle, songData);
+				std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
+			  	write_to_mp3(saveFolder + songTitle, songData);
 			}
 		}
 		std::cout<<std::endl;

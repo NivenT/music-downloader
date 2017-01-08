@@ -69,11 +69,6 @@ std::string urlify(const std::string& query) {
 	return ret;
 }
 
-std::string to_http(const std::string& url) {
-	return starts_with(url, "https") ? "http" + url.substr(5) :
-		   starts_with(url, "http")  ? url : "http" + url;
-}
-
 int levenshtein(const std::string& str1, const std::string& str2) {
 	int cost_matrix[str1.size()+1][str2.size()+1];
 	for (int i = 0; i <= str1.size(); ++i) {

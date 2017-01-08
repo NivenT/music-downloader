@@ -7,10 +7,23 @@
 using json = nlohmann::json;
 
 std::string youtube_to_download(const std::string& id) {
-	const static std::string BASE = "http://api.convert2mp3.cc/check.php?api=true&v=";
+	json request;
+	request["video"] = "http://www.youtube.com/watch?v=" + id;
+	request["autostart"] = "1";
 
-	int rand = std::rand()%3500000;
-	return BASE + id + "&h=" + std::to_string(rand);
+	std::string query = construct_query(request, {"video", "autostart"});
+	std::string url = "http://www.youtubeinmp3.com/download/?" + query;
+
+	auto response = cpr::Get(cpr::Url{url});
+	if (check_successful_response(response, "YouTubeInMP3")) {
+		auto links = get_links(response.text, -1);
+		for (const auto& link : links) {
+			if (starts_with(link, "/download")) {
+				return "http://www.youtubeinmp3.com" + link;
+			}
+		}
+	}
+	return "";
 }
 
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
