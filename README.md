@@ -10,6 +10,7 @@ To build, clone this repository and then use cmake and make. The commands you ne
 ```
 git clone https://github.com/NivenT/music-downloader
 cd music-downloader
+git submodule update --init --recursive
 mkdir build
 cd build
 cmake ../
