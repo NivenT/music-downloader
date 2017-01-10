@@ -129,10 +129,12 @@ float title_distance(const std::string& str1, const std::string& str2) {
 	return (levenshtein(str1, str2)-2*num_words_in_common(str1, str2))/std::max(str1.size(), str2.size());
 }
 
-void write_to_mp3(const std::string& title, const std::string& data) {
+void write_to_mp3(const std::string& title, const std::string& data, bool verbose) {
 	std::string path = fileify(title);
 
-	std::cout<<TAB<<"Saving song to "<<path<<std::endl;
+	if (verbose) {
+		std::cout<<TAB<<"Saving song to "<<path<<std::endl;
+	}
 	std::ofstream file(path.c_str());
 
 	file.write(data.c_str(), data.size());

@@ -27,7 +27,7 @@ std::string youtube_to_download(const std::string& id) {
 }
 
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
-std::tuple<std::string, std::string> search_youtube_for_song(const std::string& song, const std::string& apikey) {
+std::tuple<std::string, std::string> search_youtube_for_song(const std::string& song, const std::string& apikey, bool verbose) {
 	// Top result isn't guaranteed to be the correct result
 	static const int MAX_NUM_RESULTS_PER_SONG = 3;
 
@@ -40,7 +40,9 @@ std::tuple<std::string, std::string> search_youtube_for_song(const std::string& 
 	request["key"] = apikey;
 
 	std::cout<<"Searching YouTube for song: \""<<song<<"\""<<std::endl;
-	std::cout<<"Song title in url: "<<request["q"]<<std::endl;
+	if (verbose) {
+		std::cout<<"Song title in url: "<<request["q"]<<std::endl;
+	}
 
 	std::string query = construct_query(request, {"part", "topicId", "maxResults", "type", "q", "key"});
 	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search?" + query});
@@ -49,7 +51,9 @@ std::tuple<std::string, std::string> search_youtube_for_song(const std::string& 
 		json resp = json::parse(response.text);
 
 		int num_downloads = std::min<int>(resp["items"].size(), MAX_NUM_RESULTS_PER_SONG);
-		std::cout<<"Retreiving Ids for top "<<num_downloads<<" results..."<<std::endl;
+		if (verbose) {
+			std::cout<<"Retreiving Ids for top "<<num_downloads<<" results..."<<std::endl;
+		}
 		
 		float lowest_dist = 1.0;
 		std::string winner = "";
@@ -60,7 +64,9 @@ std::tuple<std::string, std::string> search_youtube_for_song(const std::string& 
 			json title = resp["items"][i]["snippet"]["title"];
 			float dist = title_distance(song, title);
 
-			std::cout<<TAB<<videoId<<" -> "<<title<<" ("<<dist<<")"<<std::endl;
+			if (verbose) {
+				std::cout<<TAB<<videoId<<" -> "<<title<<" ("<<dist<<")"<<std::endl;
+			}
 
 			winner = dist < lowest_dist ? videoId.get<std::string>() : winner;
 			winner_title = dist < lowest_dist ? title : winner_title;

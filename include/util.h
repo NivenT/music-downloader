@@ -15,6 +15,6 @@ extern int levenshtein(const std::string& str1, const std::string& str2);
 extern std::vector<std::string> get_words(const std::string& str);
 extern float num_words_in_common(const std::string& str1, const std::string& str2);
 extern float title_distance(const std::string& str1, const std::string& str2);
-extern void write_to_mp3(const std::string& title, const std::string& data);
+extern void write_to_mp3(const std::string& title, const std::string& data, bool verbose);
 extern void save_lyrics(const std::string& path, const std::string& data);
 extern std::unordered_set<std::string> match_regex(const std::string& text, const std::string& regex, int maxMatches = 10, int index = 0);

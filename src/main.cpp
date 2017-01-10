@@ -13,19 +13,20 @@ R"({progName}
 
 Usage:
   {progName} (-h | --help)
-  {progName} [--songs FILE] [--dest FOLDER]
+  {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
   {progName} --lyrics SONG [--save FILE] [--hide]
 
 Options:
   -h --help         Prints this message.
   --songs FILE      Text file containing songs to download [default: songs.txt]
   --dest FOLDER	    Destination folder (where downloaded songs are saved) [default: songs/]
+  -v --verbose      Use verbose output
   --lyrics SONG     Name of song to find the lyrics of [default: ]
   --save FILE       File to save the lyrics to [default: ]
   --hide            Doesn't print the lyrics to the terminal
 )";
 
-void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder) {
+void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder, bool verbose) {
 	std::cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<std::endl
 			 <<std::endl;
 
@@ -36,26 +37,28 @@ void download_songs(const std::string& apikey, const std::string& songList, cons
 		if (starts_with(song, "added on:")) continue;
 
 		std::string songId, songTitle;
-		std::tie(songId, songTitle) = search_youtube_for_song(song, apikey);
+		std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
 		if (songId == "") {
 			std::cout<<song<<" could not be found"<<std::endl;
 		} else {
-			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
+			if (verbose) {
+				std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
+			}
 
 			const std::string downloadUrl = youtube_to_download(songId);
 			if (downloadUrl == "") {
 				std::cout<<"Could not find song"<<std::endl
 						 <<std::endl;
 				continue;
+			} else if (verbose) {
+				std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
 			}
-
-			std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
 
 			std::string songData = download_song(downloadUrl);
 			if (songData != "") {
 				std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
-			  	write_to_mp3(saveFolder + songTitle, songData);
+			  	write_to_mp3(saveFolder + songTitle, songData, verbose);
 			}
 		}
 		std::cout<<std::endl;
@@ -107,10 +110,12 @@ int main(int argc, char** argv) {
 				saveFolder = args["--dest"].asString(),
 				song = args["--lyrics"].asString(),
 				saveFile = args["--save"].asString();
-	bool print = !args["--hide"].asBool();
+	bool print = !args["--hide"].asBool(),
+		 verbose = args["--verbose"].asBool();
 
 	if (song == "") {
-		download_songs(apikey, songList, saveFolder + (ends_with(saveFolder, "/") ? "" : "/"));
+		saveFolder = saveFolder + (ends_with(saveFolder, "/") ? "" : "/");
+		download_songs(apikey, songList, saveFolder, verbose);
 	} else {
 		get_lyrics(song, saveFile, print);
 	}
