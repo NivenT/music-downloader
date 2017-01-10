@@ -24,13 +24,14 @@ Run the program from terminal. The usage is as follows:
 
 Usage:
   ./music-downloader (-h | --help)
-  ./music-downloader [--songs FILE] [--dest FOLDER]
+  ./music-downloader [--songs FILE] [--dest FOLDER] [-v | --verbose]
   ./music-downloader --lyrics SONG [--save FILE] [--hide]
 
 Options:
   -h --help         Prints this message.
   --songs FILE      Text file containing songs to download [default: songs.txt]
   --dest FOLDER	    Destination folder (where downloaded songs are saved) [default: songs/]
+  -v --verbose      Use verbose output
   --lyrics SONG     Name of song to find the lyrics of [default: ]
   --save FILE       File to save the lyrics to [default: ]
   --hide            Doesn't print the lyrics to the terminal
@@ -47,7 +48,5 @@ Examples include
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do
-- [X] Add --help flag
-- [X] Add flags for specifying certain parameters so, for example, you can change the folder without chaning the file
-- [X] Add more parameters
+- [ ] Make the program more interactive (menu or REPL like thing most likely)
 - [ ] Add ability to supply Spotify credentials in order for program to download your saved songs (Not sure if I'll ever get around to this)
