@@ -10,13 +10,21 @@ bool check_successful_response(const cpr::Response& response, const std::string&
 	if (!response.status_code) {
 		std::cout<<"Error occured ("<<(int)response.error.code<<"):"<<std::endl
 				 <<response.error.message<<std::endl
+				 <<std::endl
+				 <<"Exiting program"<<std::endl
+				 <<std::endl;
+		exit(0xBAD);
+	} else if (response.status_code/100 == 4) {
+		std::cout<<server<<" response ("<<response.status_code<<"):"<<std::endl
+				 <<response.text<<std::endl
+				 <<std::endl
+				 <<"Exiting program"<<std::endl
 				 <<std::endl;
 		exit(0xBAD);
 	} else if (response.status_code/100 != 2) {
 		std::cout<<server<<" response ("<<response.status_code<<"):"<<std::endl
 				 <<response.text<<std::endl
 				 <<std::endl;
-		exit(0xBAD);
 	}
 	return true;
 }
