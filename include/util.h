@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 extern bool starts_with(const std::string& str, const std::string& prefix);
 extern bool ends_with(const std::string& str, const std::string& suffix);
@@ -16,3 +17,4 @@ extern float num_words_in_common(const std::string& str1, const std::string& str
 extern float title_distance(const std::string& str1, const std::string& str2);
 extern void write_to_mp3(const std::string& title, const std::string& data);
 extern void save_lyrics(const std::string& path, const std::string& data);
+extern std::unordered_set<std::string> match_regex(const std::string& text, const std::string& regex, int maxMatches = 10, int index = 0);

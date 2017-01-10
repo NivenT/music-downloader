@@ -16,7 +16,7 @@ std::string youtube_to_download(const std::string& id) {
 
 	auto response = cpr::Get(cpr::Url{url});
 	if (check_successful_response(response, "YouTubeInMP3")) {
-		auto links = get_links(response.text, -1);
+		auto links = match_regex(response.text, "href=\"([^\"]*)\"", -1, 1);
 		for (const auto& link : links) {
 			if (starts_with(link, "/download")) {
 				return "http://www.youtubeinmp3.com" + link;

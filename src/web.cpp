@@ -1,5 +1,3 @@
-#include <regex>
-
 #include <cpr/util.h>
 
 #include "util.h"
@@ -43,21 +41,6 @@ std::string search_duckduckgo(const std::string& query) {
 	std::cout<<"DuckDuckGo URL: "<<url<<std::endl;
 	auto response = cpr::Get(cpr::Url{url});
 	return check_successful_response(response, "DuckDuckGo") ? response.text : "";
-}
-
-// Idea: store results in a trie
-std::set<std::string> get_links(const std::string& html, int maxMatches) {
-	std::string search = html;
-	std::regex re_links("href=\"([^\"]*)\"");
-	std::smatch match;
-
-	std::set<std::string> links;
-	while ((links.size() < maxMatches || maxMatches == -1) && std::regex_search(search, match, re_links)) {
-		//std::cout<<"found: "<<match[1]<<std::endl;
-		links.insert(match[1]);
-		search = match.suffix().str();
-	}
-	return links;
 }
 
 std::string remove_html_tags(const std::string& html) {

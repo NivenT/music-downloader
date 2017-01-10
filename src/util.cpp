@@ -2,8 +2,8 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
-#include <unordered_set>
 #include <iomanip>
+#include <regex>
 
 #include <cpr/util.h>
 
@@ -14,7 +14,7 @@ bool starts_with(const std::string& str, const std::string& prefix) {
 }
 
 bool ends_with(const std::string& str, const std::string& suffix) {
-	return str.find_last_of(suffix) == str.size() - 1;
+	return str.rfind(suffix) == str.size() - suffix.size();
 }
 
 std::string replace_all(const std::string& str, const std::string o, const std::string n) {
@@ -145,4 +145,17 @@ void save_lyrics(const std::string& path, const std::string& data) {
 
 	file.write(data.c_str(), data.size());
 	file.close();
+}
+
+std::unordered_set<std::string> match_regex(const std::string& text, const std::string& regex, int maxMatches, int index) {
+	std::string search = text;
+	std::regex re_links(regex);
+	std::smatch match;
+
+	std::unordered_set<std::string> matches;
+	while ((matches.size() < maxMatches || maxMatches == -1) && std::regex_search(search, match, re_links)) {
+		matches.insert(match[index]);
+		search = match.suffix().str();
+	}
+	return matches;
 }
