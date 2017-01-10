@@ -39,8 +39,9 @@ Options:
 ```
 Examples include
 
-* `./music-downloader` - This will download all the songs in songs.txt and save them in a folder named songs
-* `./music-downloader --lyrics "Thriller"` - This will search for the song Thriller and print its lyrics
+* `./music-downloader` This will download all the songs in songs.txt and save them in a folder named songs
+* `./music-downloader --lyrics "Thriller"` This will search for the song Thriller and print its lyrics
+* `./music-downloader --dest music -v` This will download all the songs in songs.txt and save them in a folder named music. It will also print verbose output.
 
 ## Details
 - The program retrieves the top 3 results for each song, and selects one to download
