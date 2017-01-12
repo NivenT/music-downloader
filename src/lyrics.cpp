@@ -3,7 +3,7 @@
 #include "lyrics.h"
 
 std::string get_metrolyrics(const std::string& url) {
-	std::cout<<"Retrieving lyrics from MetroLyrics"<<std::endl
+	std::cout<<"Retrieving lyrics from MetroLyrics ("<<url<<")"<<std::endl
 			 <<std::endl;
 
 	auto response = cpr::Get(cpr::Url{url});

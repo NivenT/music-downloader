@@ -15,6 +15,7 @@ Usage:
   {progName} (-h | --help)
   {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
   {progName} --lyrics SONG [--save FILE] [--hide]
+  {progName} --download SONG [--dest FOLDER] [-v | --verbose]
 
 Options:
   -h --help         Prints this message.
@@ -24,7 +25,39 @@ Options:
   --lyrics SONG     Name of song to find the lyrics of [default: ]
   --save FILE       File to save the lyrics to [default: ]
   --hide            Doesn't print the lyrics to the terminal
+  --download SONG   Downloads a single song [default: ]
 )";
+
+void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, bool verbose) {
+	std::cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<std::endl
+	         <<std::endl;
+
+	std::string songId, songTitle;
+	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
+
+	if (songId == "") {
+		std::cout<<song<<" could not be found"<<std::endl;
+	} else {
+		if (verbose) {
+			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
+		}
+
+		const std::string downloadUrl = youtube_to_download(songId);
+		if (downloadUrl == "") {
+			std::cout<<"Could not find song"<<std::endl
+					 <<std::endl;
+			return;
+		} else if (verbose) {
+			std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
+		}
+
+		std::string songData = download_song(downloadUrl);
+		if (songData != "") {
+			std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
+		  	write_to_mp3(saveFolder + songTitle, songData, verbose);
+		}
+	}
+}
 
 void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder, bool verbose) {
 	std::cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<std::endl
@@ -34,34 +67,10 @@ void download_songs(const std::string& apikey, const std::string& songList, cons
 
 	std::string song;
 	while (std::getline(songFile, song)) {
-		if (starts_with(song, "added on:")) continue;
-
-		std::string songId, songTitle;
-		std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
-
-		if (songId == "") {
-			std::cout<<song<<" could not be found"<<std::endl;
-		} else {
-			if (verbose) {
-				std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
-			}
-
-			const std::string downloadUrl = youtube_to_download(songId);
-			if (downloadUrl == "") {
-				std::cout<<"Could not find song"<<std::endl
-						 <<std::endl;
-				continue;
-			} else if (verbose) {
-				std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
-			}
-
-			std::string songData = download_song(downloadUrl);
-			if (songData != "") {
-				std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
-			  	write_to_mp3(saveFolder + songTitle, songData, verbose);
-			}
+		if (!starts_with(song, "added on:")) {
+			download_song(apikey, song, saveFolder, verbose);
+			std::cout<<std::endl;
 		}
-		std::cout<<std::endl;
 	}
 }
 
@@ -113,11 +122,13 @@ int main(int argc, char** argv) {
 	bool print = !args["--hide"].asBool(),
 		 verbose = args["--verbose"].asBool();
 
-	if (song == "") {
-		saveFolder = saveFolder + (ends_with(saveFolder, "/") ? "" : "/");
-		download_songs(apikey, songList, saveFolder, verbose);
-	} else {
+	saveFolder = saveFolder + (ends_with(saveFolder, "/") ? "" : "/");
+	if (song != "") {
 		get_lyrics(song, saveFile, print);
+	} else if ((song = args["--download"].asString()) != "") {
+		download_song(apikey, song, saveFolder, verbose);
+	} else {
+		download_songs(apikey, songList, saveFolder, verbose);
 	}
 	return 0;
 }

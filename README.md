@@ -26,6 +26,7 @@ Usage:
   ./music-downloader (-h | --help)
   ./music-downloader [--songs FILE] [--dest FOLDER] [-v | --verbose]
   ./music-downloader --lyrics SONG [--save FILE] [--hide]
+  ./music-downloader --download SONG [--dest FOLDER] [-v | --verbose]
 
 Options:
   -h --help         Prints this message.
@@ -35,6 +36,7 @@ Options:
   --lyrics SONG     Name of song to find the lyrics of [default: ]
   --save FILE       File to save the lyrics to [default: ]
   --hide            Doesn't print the lyrics to the terminal
+  --download SONG   Downloads a single song [default: ]
 
 ```
 Examples include
@@ -42,6 +44,7 @@ Examples include
 * `./music-downloader` This will download all the songs in songs.txt and save them in a folder named songs
 * `./music-downloader --lyrics "Thriller"` This will search for the song Thriller and print its lyrics
 * `./music-downloader --dest music -v` This will download all the songs in songs.txt and save them in a folder named music. It will also print verbose output.
+* `./music-downloader --download "Thriller"` This will download Thriller and save is in a folder names songs.
 
 ## Details
 - The program retrieves the top 3 results for each song, and selects one to download

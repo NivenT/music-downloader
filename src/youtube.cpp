@@ -72,7 +72,9 @@ std::tuple<std::string, std::string> search_youtube_for_song(const std::string& 
 			winner_title = dist < lowest_dist ? title : winner_title;
 			lowest_dist = std::min(dist, lowest_dist);
 		}
-		std::cout<<"The following video was chosen: "<<winner_title<<std::endl;
+		if (verbose) {
+			std::cout<<"The following video was chosen: "<<winner_title<<std::endl;
+		}
 		return std::make_tuple(winner, winner_title.get<std::string>());
 	}
 	return std::make_tuple("", "");
