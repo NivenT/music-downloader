@@ -29,9 +29,6 @@ Options:
 )";
 
 void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, bool verbose) {
-	std::cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<std::endl
-	         <<std::endl;
-
 	std::string songId, songTitle;
 	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
@@ -54,7 +51,7 @@ void download_song(const std::string& apikey, const std::string& song, const std
 		std::string songData = download_song(downloadUrl);
 		if (songData != "") {
 			std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
-		  	write_to_mp3(saveFolder + songTitle, songData, verbose);
+		  	write_to_mp3(saveFolder + replace_all(songTitle, "/", "_"), songData, verbose);
 		}
 	}
 }
@@ -126,6 +123,8 @@ int main(int argc, char** argv) {
 	if (song != "") {
 		get_lyrics(song, saveFile, print);
 	} else if ((song = args["--download"].asString()) != "") {
+		std::cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<std::endl
+	         <<std::endl;
 		download_song(apikey, song, saveFolder, verbose);
 	} else {
 		download_songs(apikey, songList, saveFolder, verbose);
