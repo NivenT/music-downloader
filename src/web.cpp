@@ -1,3 +1,5 @@
+#include <stack>
+
 #include <cpr/util.h>
 
 #include "util.h"
@@ -51,7 +53,7 @@ std::string search_duckduckgo(const std::string& query) {
 	return check_successful_response(response, "DuckDuckGo") ? response.text : "";
 }
 
-std::string remove_html_tags(const std::string& html) {
+std::string remove_html_tags(const std::string& html, const std::string& rpl) {
 	std::string tagless = html;
 
 	int pos = 0;
@@ -60,7 +62,7 @@ std::string remove_html_tags(const std::string& html) {
 		int end = tagless.find('>', pos);
 
 		std::string tag = tagless.substr(pos, end-pos+1);
-		tagless.replace(pos, end-pos+1, tag == "<br>" ? "" : "\n");
+		tagless.replace(pos, end-pos+1, tag == "<br>" ? "" : rpl);
 	}
 	return trim(tagless);
 }

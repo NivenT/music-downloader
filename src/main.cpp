@@ -76,21 +76,19 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 	         <<std::endl;
 
 	std::string search_results = search_duckduckgo(song + " lyrics");
-	auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)");
+	auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)", 20);
 
 	bool found = false;
 	std::string lyrics;
-	for (const auto& url : links) {
-		found = true;
+	for (auto it = links.begin(); it != links.end() && !found; ++it) {
+		const auto url = *it;
 		if (starts_with(url, "metrolyrics")) {
-			lyrics = get_metrolyrics(url);
-			break;
-		} else if (starts_with(url, "azlyrics")) {
-			// TODO
-		} else if (starts_with(url, "musixmatch")) {
-			// TODO
+			std::tie(found, lyrics) = get_metrolyrics(url);
+		} else if (starts_with(url, "genius")) {
+			std::tie(found, lyrics) = get_genius(url);
+		} else if (starts_with(url, "lyricsbox")) {
+			std::tie(found, lyrics) = get_lyricsbox(url);
 		}
-		found = false;
 	}
 
 	if (!found) {
