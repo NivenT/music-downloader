@@ -1,5 +1,5 @@
+#include "util.h"
 #include "web.h"
-
 #include "lyrics.h"
 
 std::tuple<bool, std::string> get_metrolyrics(const std::string& url) {
@@ -31,6 +31,10 @@ std::tuple<bool, std::string> get_genius(const std::string& url) {
 
 			int end = response.text.find("</div>", start);
 			std::string lyrics = remove_html_tags(response.text.substr(start, end-start), "");
+			
+			if (ends_with(lyrics, "More on Genius")) {
+				lyrics = trim(lyrics.substr(0, lyrics.size()-14));
+			}
 			return std::make_tuple(true, lyrics);
 		}
 	}
