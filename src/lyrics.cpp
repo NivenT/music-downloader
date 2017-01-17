@@ -6,7 +6,7 @@ std::string get_metrolyrics(const std::string& url) {
 	std::cout<<"Retrieving lyrics from MetroLyrics ("<<url<<")"<<std::endl
 			 <<std::endl;
 
-	auto response = cpr::Get(cpr::Url{url});
+	auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
 	if (check_successful_response(response, "MetroLyrics")) {
 		// Terrible way to find the lyrics
 		int start = response.text.find(R"(<div id="lyrics-body-text")");

@@ -47,7 +47,7 @@ std::string search_duckduckgo(const std::string& query) {
 	std::string url = "https://duckduckgo.com/html/?q=" + urlify(query);
 
 	std::cout<<"DuckDuckGo URL: "<<url<<std::endl;
-	auto response = cpr::Get(cpr::Url{url});
+	auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
 	return check_successful_response(response, "DuckDuckGo") ? response.text : "";
 }
 

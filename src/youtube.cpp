@@ -45,8 +45,9 @@ std::tuple<std::string, std::string> search_youtube_for_song(const std::string& 
 	}
 
 	std::string query = construct_query(request, {"part", "topicId", "maxResults", "type", "q", "key"});
-	auto response = cpr::Get(cpr::Url{"https://www.googleapis.com/youtube/v3/search?" + query});
-
+	std::string url = "https://www.googleapis.com/youtube/v3/search?" + query;
+	
+	auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
 	if (check_successful_response(response, "YouTube")) {
 		json resp = json::parse(response.text);
 

@@ -1,9 +1,9 @@
 [submodule "opt/cpr"]
 	path = opt/cpr
-	url = git://github.com/whoshuu/cpr.git
+	url = https://github.com/whoshuu/cpr
 [submodule "opt/json"]
 	path = opt/json
-	url = git://github.com/nlohmann/json.git
+	url = https://github.com/nlohmann/json
 [submodule "opt/docopt"]
 	path = opt/docopt
 	url = https://github.com/docopt/docopt.cpp
