@@ -60,3 +60,20 @@ std::tuple<bool, std::string> get_lyricsbox(const std::string& url) {
 		}
 	}
 }
+
+std::tuple<bool, std::string> get_songlyrics(const std::string& url) {
+	auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
+	if (check_successful_response(response, "SongLyrics")) {
+		int start = response.text.find(R"(<p id="songLyricsDiv")");
+		if (start == std::string::npos) {
+			return std::make_tuple(false, "");
+		} else {
+			std::cout<<"Retrieving lyrics from SongLyrics ("<<url<<")"<<std::endl
+			         <<std::endl;
+
+			int end = response.text.find("</p>", start);
+			std::string lyrics = remove_html_tags(response.text.substr(start, end-start), "");
+			return std::make_tuple(true, lyrics);
+		}
+	}
+}

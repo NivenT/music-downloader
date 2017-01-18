@@ -88,6 +88,8 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 			std::tie(found, lyrics) = get_genius(url);
 		} else if (starts_with(url, "lyricsbox")) {
 			std::tie(found, lyrics) = get_lyricsbox(url);
+		} else if (starts_with(url, "songlyrics")) {
+			std::tie(found, lyrics) = get_songlyrics(url);
 		}
 	}
 
