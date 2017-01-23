@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_set>
 
+extern bool song_exists(const std::string& title);
 extern bool starts_with(const std::string& str, const std::string& prefix);
 extern bool ends_with(const std::string& str, const std::string& suffix);
 extern std::string replace_all(const std::string& str, const std::string o, const std::string n);

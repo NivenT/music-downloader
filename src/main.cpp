@@ -32,8 +32,12 @@ void download_song(const std::string& apikey, const std::string& song, const std
 	std::string songId, songTitle;
 	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
+	std::string fileTitle = saveFolder + replace_all(songTitle, "/", "_");
+
 	if (songId == "") {
-		std::cout<<song<<" could not be found"<<std::endl;
+		std::cout<<"\""<<song<<"\" could not be found"<<std::endl;
+	} else if (song_exists(fileTitle)) {
+		std::cout<<"\""<<song<<"\" has already been downloaded"<<std::endl;
 	} else {
 		if (verbose) {
 			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
@@ -51,7 +55,7 @@ void download_song(const std::string& apikey, const std::string& song, const std
 		std::string songData = download_song(downloadUrl);
 		if (songData != "") {
 			std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
-		  	write_to_mp3(saveFolder + replace_all(songTitle, "/", "_"), songData, verbose);
+		  	write_to_mp3(fileTitle, songData, verbose);
 		}
 	}
 }

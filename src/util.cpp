@@ -9,6 +9,12 @@
 
 #include "util.h"
 
+bool song_exists(const std::string& title) {
+	std::string path = fileify(title);
+	std::ifstream file(path.c_str());
+	return file.good();
+}
+
 bool starts_with(const std::string& str, const std::string& prefix) {
 	return str.find(prefix) == 0;
 }
