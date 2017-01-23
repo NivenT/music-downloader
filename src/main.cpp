@@ -32,7 +32,7 @@ void download_song(const std::string& apikey, const std::string& song, const std
 	std::string songId, songTitle;
 	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
-	std::string fileTitle = saveFolder + replace_all(songTitle, "/", "_");
+	std::string fileTitle = saveFolder + replace_all(replace_all(songTitle, "/", "_"), ".", "");
 
 	if (songId == "") {
 		std::cout<<"\""<<song<<"\" could not be found"<<std::endl;
