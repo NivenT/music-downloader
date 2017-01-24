@@ -27,6 +27,7 @@ bool check_successful_response(const cpr::Response& response, const std::string&
 		std::cout<<server<<" response ("<<response.status_code<<"):"<<std::endl
 				 <<response.text<<std::endl
 				 <<std::endl;
+		return false;
 	}
 	return true;
 }
@@ -41,8 +42,13 @@ std::string construct_query(const json& request, const std::vector<std::string>&
 }
 
 std::string download_song(const std::string& url) {
+	static const auto doAgain = [](const std::string& mp3) {
+		// Magic number is hopefully not so magic
+		return starts_with(trim(mp3), "<html>") || mp3.size() < 1000;
+	};
+
 	auto response = cpr::Get(cpr::Url{url});
-	while (check_successful_response(response, "YouTubeInMP3") && starts_with(trim(response.text), "<html>")) {
+	while (check_successful_response(response, "YouTubeInMP3") && doAgain(response.text)) {
 		response = cpr::Get(cpr::Url{url});
 	}
 	return response.text;
