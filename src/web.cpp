@@ -42,7 +42,10 @@ std::string construct_query(const json& request, const std::vector<std::string>&
 
 std::string download_song(const std::string& url) {
 	auto response = cpr::Get(cpr::Url{url});
-	return check_successful_response(response, "YouTubeInMP3") ? response.text : "";
+	while (check_successful_response(response, "YouTubeInMP3") && starts_with(trim(response.text), "<html>")) {
+		response = cpr::Get(cpr::Url{url});
+	}
+	return response.text;
 }
 
 std::string search_duckduckgo(const std::string& query) {
