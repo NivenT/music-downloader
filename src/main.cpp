@@ -56,6 +56,8 @@ void download_song(const std::string& apikey, const std::string& song, const std
 		if (songData != "") {
 			std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
 		  	write_to_mp3(fileTitle, songData, verbose);
+		} else {
+			std::cout<<"Failed to download "<<songTitle<<std::endl;
 		}
 	}
 }

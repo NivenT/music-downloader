@@ -42,13 +42,17 @@ std::string construct_query(const json& request, const std::vector<std::string>&
 }
 
 std::string download_song(const std::string& url) {
-	static const auto doAgain = [](const std::string& mp3) {
+	static const int MAX_NUM_ATTEMPTS = 100;
+
+	static const auto doAgain = [](std::string& mp3) {
 		// Magic number is hopefully not so magic
-		return starts_with(trim(mp3), "<html>") || mp3.size() < 1000;
+		bool bad = starts_with(trim(mp3), "<html>") || mp3.size() < 100*1024;
+		mp3 = bad ? "" : mp3;
+		return bad;
 	};
 
 	auto response = cpr::Get(cpr::Url{url});
-	while (check_successful_response(response, "YouTubeInMP3") && doAgain(response.text)) {
+	for (int i = 0; check_successful_response(response, "YouTubeInMP3") && doAgain(response.text) && i < MAX_NUM_ATTEMPTS ; ++i) {
 		response = cpr::Get(cpr::Url{url});
 	}
 	return response.text;
