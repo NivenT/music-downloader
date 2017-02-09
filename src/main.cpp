@@ -129,7 +129,8 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 void print_statistics() {
 	static const int PRINT_THRESHOLD = 10;
 
-	std::cout<<"Download summary:"<<std::endl;
+	std::cout<<"*******Download summary*******"<<std::endl
+			 <<std::endl;
 	for (const auto& pair : stats) {
 		const std::string& msg = pair.first;
 		const std::set<std::string>& data = pair.second;
@@ -140,15 +141,20 @@ void print_statistics() {
 				std::cout<<TAB<<song<<std::endl;
 			}
 		} else {
-			int count = PRINT_THRESHOLD-1;
+			int nend = 0.3*PRINT_THRESHOLD;
+			int count = PRINT_THRESHOLD-nend;
+
 			for (auto it = data.begin(); count > 0; ++it, --count) {
 				std::cout<<TAB<<(*it)<<std::endl;
 			}
 			std::cout<<TAB<<"."<<std::endl
 					 <<TAB<<"."<<std::endl
-					 <<TAB<<"."<<std::endl
-					 <<TAB<<*(--data.end())<<std::endl;
+					 <<TAB<<"."<<std::endl;
+			for (auto it = data.end(); nend > 0; --nend) {
+				std::cout<<TAB<<*(--it)<<std::endl;
+			}
 		}
+		std::cout<<std::endl;
 	}
 }
 
