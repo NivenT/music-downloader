@@ -41,21 +41,20 @@ std::string construct_query(const json& request, const std::vector<std::string>&
 	return query;
 }
 
-std::string download_song(const std::string& url) {
+std::tuple<bool, std::string> download_song(const std::string& url) {
 	static const int MAX_NUM_ATTEMPTS = 100;
 
-	static const auto doAgain = [](std::string& mp3) {
+	static const auto doAgain = [](const std::string& mp3) {
 		// Magic number is hopefully not so magic
-		bool bad = starts_with(trim(mp3), "<html>") || mp3.size() < 100*1024;
-		mp3 = bad ? "" : mp3;
-		return bad;
+		return starts_with(trim(mp3), "<html>") || mp3.size() < 100*1024;
 	};
 
-	auto response = cpr::Get(cpr::Url{url});
-	for (int i = 0; check_successful_response(response, "YouTubeInMP3") && doAgain(response.text) && i < MAX_NUM_ATTEMPTS ; ++i) {
+	auto response = cpr::Get(cpr::Url{url}); bool fail;
+	for (int i = 0; fail = doAgain(response.text) && check_successful_response(response, "YouTubeInMP3") && i < MAX_NUM_ATTEMPTS; ++i) {
 		response = cpr::Get(cpr::Url{url});
 	}
-	return response.text;
+	// check_successful_response here may not be needed
+	return std::make_tuple(!fail && check_successful_response(response, "YouTubeInMP3"), response.text);
 }
 
 std::string search_duckduckgo(const std::string& query) {

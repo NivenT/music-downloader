@@ -28,6 +28,9 @@ Options:
   --download SONG   Downloads a single song [default: ]
 )";
 
+// oh gosh, a global variable. I've finally hit CS rock bottom
+std::map<std::string, std::set<std::string>> stats;
+
 void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, bool verbose) {
 	std::string songId, songTitle;
 	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
@@ -36,8 +39,12 @@ void download_song(const std::string& apikey, const std::string& song, const std
 
 	if (songId == "") {
 		std::cout<<"\""<<song<<"\" could not be found"<<std::endl;
+
+		stats["not found"].insert(song);
 	} else if (song_exists(fileTitle)) {
 		std::cout<<"\""<<song<<"\" has already been downloaded"<<std::endl;
+
+		stats["already existed"].insert(song);
 	} else {
 		if (verbose) {
 			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
@@ -47,17 +54,24 @@ void download_song(const std::string& apikey, const std::string& song, const std
 		if (downloadUrl == "") {
 			std::cout<<"Could not find song"<<std::endl
 					 <<std::endl;
+
+			stats["not found"].insert(song);
 			return;
 		} else if (verbose) {
 			std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
 		}
 
-		std::string songData = download_song(downloadUrl);
-		if (songData != "") {
+		std::string songData; bool succ;
+		std::tie(succ, songData) = download_song(downloadUrl);
+		if (succ) {
 			std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
 		  	write_to_mp3(fileTitle, songData, verbose);
+
+		  	stats["successfully downloaded"].insert(song);
 		} else {
 			std::cout<<"Failed to download "<<songTitle<<std::endl;
+
+			stats["could not be downloaded"].insert(song);
 		}
 	}
 }
@@ -112,6 +126,32 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 	}
 }
 
+void print_statistics() {
+	static const int PRINT_THRESHOLD = 10;
+
+	std::cout<<"Download summary:"<<std::endl;
+	for (const auto& pair : stats) {
+		const std::string& msg = pair.first;
+		const std::set<std::string>& data = pair.second;
+
+		std::cout<<data.size()<<" songs "<<msg<<". They were:"<<std::endl;
+		if (data.size() <= PRINT_THRESHOLD) {
+			for (const auto& song : data) {
+				std::cout<<TAB<<song<<std::endl;
+			}
+		} else {
+			int count = PRINT_THRESHOLD-1;
+			for (auto it = data.begin(); count > 0; ++it, --count) {
+				std::cout<<TAB<<(*it)<<std::endl;
+			}
+			std::cout<<TAB<<"."<<std::endl
+					 <<TAB<<"."<<std::endl
+					 <<TAB<<"."<<std::endl
+					 <<TAB<<*(--data.end())<<std::endl;
+		}
+	}
+}
+
 int main(int argc, char** argv) {
 	std::map<std::string, docopt::value> args =
 		docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
@@ -134,6 +174,7 @@ int main(int argc, char** argv) {
 		download_song(apikey, song, saveFolder, verbose);
 	} else {
 		download_songs(apikey, songList, saveFolder, verbose);
+		print_statistics();
 	}
 	return 0;
 }
