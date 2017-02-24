@@ -8,6 +8,7 @@ extern bool song_exists(const std::string& title);
 extern bool starts_with(const std::string& str, const std::string& prefix);
 extern bool ends_with(const std::string& str, const std::string& suffix);
 extern std::string replace_all(const std::string& str, const std::string o, const std::string n);
+extern std::string replace_all(const std::string& str, const std::vector<std::vector<std::string>> os, const std::vector<std::string> ns);
 extern std::string trim(const std::string& str);
 extern std::string to_hex(unsigned char c);
 extern std::string fileify(const std::string& title);

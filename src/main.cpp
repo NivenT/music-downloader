@@ -32,10 +32,12 @@ Options:
 std::map<std::string, std::set<std::string>> stats;
 
 void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, bool verbose) {
+	static const float SIMILARITY_THRESHOLD = 0.65;
+
 	std::string songId, songTitle;
 	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
-	std::string fileTitle = saveFolder + replace_all(replace_all(songTitle, "/", "_"), ".", "");
+	std::string fileTitle = saveFolder + replace_all(songTitle, {{"/"}, {".", "|", ":", "\"", "'"}}, {"_", ""});
 
 	if (songId == "") {
 		std::cout<<"\""<<song<<"\" could not be found"<<std::endl;
@@ -67,7 +69,11 @@ void download_song(const std::string& apikey, const std::string& song, const std
 			std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
 		  	write_to_mp3(fileTitle, songData, verbose);
 
-		  	stats["successfully downloaded"].insert(song);
+		  	if (title_distance(song, songTitle) >= SIMILARITY_THRESHOLD) {
+		  		stats["downloaded, but were likely not the songs you wanted"].insert(song + " -> " + songTitle);
+		  	} else {
+		  		stats["successfully downloaded"].insert(song);
+		  	}
 		} else {
 			std::cout<<"Failed to download "<<songTitle<<std::endl;
 
@@ -150,6 +156,7 @@ void print_statistics() {
 			std::cout<<TAB<<"."<<std::endl
 					 <<TAB<<"."<<std::endl
 					 <<TAB<<"."<<std::endl;
+			// Reverse alphabetical order because its easier
 			for (auto it = data.end(); nend > 0; --nend) {
 				std::cout<<TAB<<*(--it)<<std::endl;
 			}

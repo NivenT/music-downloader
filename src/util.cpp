@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <regex>
+#include <cassert>
 
 #include <cpr/util.h>
 
@@ -30,6 +31,20 @@ std::string replace_all(const std::string& str, const std::string o, const std::
 	while ((pos = ret.find(o, pos)) != std::string::npos) {
 		ret.replace(pos, o.size(), n);
 		pos += n.size();
+	}
+	return ret;
+}
+
+
+std::string replace_all(const std::string& str, const std::vector<std::vector<std::string>> os, const std::vector<std::string> ns) {
+	assert(os.size() == ns.size());
+
+	std::string ret = str;
+	// Could be done in one pass over the string but this is easier
+	for (int i = 0; i < os.size(); ++i) {
+		for (int j = 0; j < os[i].size(); ++j) {
+			ret = replace_all(ret, os[i][j], ns[i]);
+		}
 	}
 	return ret;
 }
