@@ -32,12 +32,13 @@ Options:
 std::map<std::string, std::set<std::string>> stats;
 
 void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, bool verbose) {
-	static const float SIMILARITY_THRESHOLD = 0.65;
+	static const float SIMILARITY_THRESHOLD = 0.63;
 
 	std::string songId, songTitle;
 	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
 	std::string fileTitle = saveFolder + replace_all(songTitle, {{"/"}, {".", "|", ":", "\"", "'"}}, {"_", ""});
+	std::string match;
 
 	if (songId == "") {
 		std::cout<<"\""<<song<<"\" could not be found"<<std::endl;
@@ -47,6 +48,11 @@ void download_song(const std::string& apikey, const std::string& song, const std
 		std::cout<<"\""<<song<<"\" has already been downloaded"<<std::endl;
 
 		stats["already existed"].insert(song);
+	} else if ((match = song_probably_exists(fileTitle, saveFolder)) != "") {
+		std::cout<<"\""<<song<<"\" has likely already been downloaded"<<std::endl
+				 <<"\""<<match<<"\" was found which is a close match"<<std::endl;
+
+		stats["probably already existed, and so were not downloaded"].insert(song + " -> " + match);
 	} else {
 		if (verbose) {
 			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;

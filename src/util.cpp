@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <regex>
 #include <cassert>
+#include <dirent.h>
 
 #include <cpr/util.h>
 
@@ -22,6 +23,25 @@ bool starts_with(const std::string& str, const std::string& prefix) {
 
 bool ends_with(const std::string& str, const std::string& suffix) {
 	return str.rfind(suffix) == str.size() - suffix.size();
+}
+
+std::string song_probably_exists(const std::string& title, const std::string& folder) {
+	// Possible too generous?
+	static const float MATCH_THRESHOLD = 0.35;
+
+	std::string title_without_folder = title.substr(folder.size());
+
+	DIR *dir;
+	struct dirent *entry;
+	if ((dir = opendir(folder.c_str())) != NULL) {
+		while ((entry = readdir(dir)) != NULL) {
+			if (title_distance(title_without_folder, entry->d_name) < MATCH_THRESHOLD) {
+				return entry->d_name;
+			}
+		}
+		closedir(dir);
+	}
+	return "";
 }
 
 std::string replace_all(const std::string& str, const std::string o, const std::string n) {
