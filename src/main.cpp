@@ -114,7 +114,9 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 	std::string lyrics;
 	for (auto it = links.begin(); it != links.end() && !found; ++it) {
 		const auto url = *it;
-		if (starts_with(url, "metrolyrics")) {
+		if (ends_with(url, ".")) {
+			continue;
+		} else if (starts_with(url, "metrolyrics")) {
 			std::tie(found, lyrics) = get_metrolyrics(url);
 		} else if (starts_with(url, "genius")) {
 			std::tie(found, lyrics) = get_genius(url);
