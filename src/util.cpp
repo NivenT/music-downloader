@@ -26,6 +26,9 @@ bool ends_with(const std::string& str, const std::string& suffix) {
 }
 
 std::string song_probably_exists(const std::string& title, const std::string& folder) {
+	// title_distance is not realiable enough for this function to work well
+	return "";
+
 	// Possible too generous?
 	static const float MATCH_THRESHOLD = 0.35;
 
