@@ -16,22 +16,24 @@ Usage:
   {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
   {progName} --lyrics SONG [--save FILE] [--hide]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
+  {progName} --play FILE [--show-lyrics] [--show-play-output]
 
 Options:
-  -h --help         Prints this message.
-  --songs FILE      Text file containing songs to download [default: songs.txt]
-  --dest FOLDER	    Destination folder (where downloaded songs are saved) [default: songs/]
-  -v --verbose      Use verbose output
-  --lyrics SONG     Name of song to find the lyrics of [default: ]
-  --save FILE       File to save the lyrics to [default: ]
-  --hide            Doesn't print the lyrics to the terminal
-  --download SONG   Downloads a single song [default: ]
+  -h --help             Prints this message.
+  --songs FILE          Text file containing songs to download [default: songs.txt]
+  --dest FOLDER	        Destination folder (where downloaded songs are saved) [default: songs/]
+  -v --verbose          Use verbose output
+  --lyrics SONG         Name of song to find the lyrics of [default: ]
+  --save FILE           File to save the lyrics to [default: ]
+  --hide                Doesn't print the lyrics to the terminal
+  --download SONG       Downloads a single song [default: ]
+  --play FILE           Plays a song from an .mp3 file
+  --show-lyrics         Prints lyrics of song to the screen
+  --show-play-output    Does not use quiet flag when running play command
 )";
 
-// oh gosh, a global variable. I've finally hit CS rock bottom
-std::map<std::string, std::set<std::string>> stats;
-
-void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, bool verbose) {
+void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, 
+					bool verbose, std::map<std::string, std::set<std::string>>& stats) {
 	static const float SIMILARITY_THRESHOLD = 0.63;
 
 	std::string songId, songTitle;
@@ -88,7 +90,8 @@ void download_song(const std::string& apikey, const std::string& song, const std
 	}
 }
 
-void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder, bool verbose) {
+void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder, 
+					bool verbose, std::map<std::string, std::set<std::string>>& stats) {
 	std::cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<std::endl
 			 <<std::endl;
 
@@ -97,50 +100,13 @@ void download_songs(const std::string& apikey, const std::string& songList, cons
 	std::string song;
 	while (std::getline(songFile, song)) {
 		if (!starts_with(song, "added on:")) {
-			download_song(apikey, song, saveFolder, verbose);
+			download_song(apikey, song, saveFolder, verbose, stats);
 			std::cout<<std::endl;
 		}
 	}
 }
 
-void get_lyrics(const std::string& song, const std::string& saveFile, bool print) {
-	std::cout<<"Searching for the lyrics of \""<<song<<"\""<<std::endl
-	         <<std::endl;
-
-	std::string search_results = search_duckduckgo(song + " lyrics");
-	auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)", 20);
-
-	bool found = false;
-	std::string lyrics;
-	for (auto it = links.begin(); it != links.end() && !found; ++it) {
-		const auto url = *it;
-		if (ends_with(url, ".")) {
-			continue;
-		} else if (starts_with(url, "metrolyrics")) {
-			std::tie(found, lyrics) = get_metrolyrics(url);
-		} else if (starts_with(url, "genius")) {
-			std::tie(found, lyrics) = get_genius(url);
-		} else if (starts_with(url, "lyricsbox")) {
-			std::tie(found, lyrics) = get_lyricsbox(url);
-		} else if (starts_with(url, "songlyrics")) {
-			std::tie(found, lyrics) = get_songlyrics(url);
-		}
-	}
-
-	if (!found) {
-		std::cout<<"Unable to find lyrics"<<std::endl;
-	} else {
-		if (print) {
-			std::cout<<lyrics<<std::endl
-					 <<std::endl;
-		}
-		if (saveFile != "") {
-			save_lyrics(saveFile, lyrics);
-		}
-	}
-}
-
-void print_statistics() {
+void print_statistics(std::map<std::string, std::set<std::string>> stats) {
 	static const int PRINT_THRESHOLD = 10;
 
 	std::cout<<"*******Download summary*******"<<std::endl
@@ -173,6 +139,50 @@ void print_statistics() {
 	}
 }
 
+void get_lyrics(const std::string& song, const std::string& saveFile, bool print) {
+	static const int NUM_RESULTS = 25;
+
+	std::cout<<"Searching for the lyrics of \""<<song<<"\""<<std::endl
+	         <<std::endl;
+
+	std::string search_results = search_duckduckgo(song + " lyrics");
+	auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)", NUM_RESULTS);
+
+	bool found = false;
+	std::string lyrics;
+	for (auto it = links.begin(); it != links.end() && !found; ++it) {
+		const auto url = *it;
+		if (ends_with(url, ".")) {
+			continue;
+		} else if (starts_with(url, "metrolyrics")) {
+			std::tie(found, lyrics) = get_metrolyrics(url);
+		} else if (starts_with(url, "genius")) {
+			std::tie(found, lyrics) = get_genius(url);
+		} else if (starts_with(url, "lyricsbox")) {
+			std::tie(found, lyrics) = get_lyricsbox(url);
+		} else if (starts_with(url, "songlyrics")) {
+			std::tie(found, lyrics) = get_songlyrics(url);
+		}
+	}
+
+	if (!found) {
+		std::cout<<"Unable to find lyrics"<<std::endl;
+	} else {
+		if (print) {
+			std::cout<<lyrics<<std::endl
+					 <<std::endl;
+		}
+		if (saveFile != "") {
+			save_lyrics(saveFile, lyrics);
+		}
+	}
+}
+
+// Will this work on OS's other than Ubuntu?
+void play_song(const std::string& file, bool show_lyrics, bool show_output) {
+	
+}
+
 int main(int argc, char** argv) {
 	std::map<std::string, docopt::value> args =
 		docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
@@ -184,18 +194,23 @@ int main(int argc, char** argv) {
 				song = args["--lyrics"].asString(),
 				saveFile = args["--save"].asString();
 	bool print = !args["--hide"].asBool(),
-		 verbose = args["--verbose"].asBool();
+		 verbose = args["--verbose"].asBool(),
+		 lyrics = args["--show-lyrics"].asBool(),
+		 playout = args["--show-play-output"].asBool();
 
+	std::map<std::string, std::set<std::string>> stats;
 	saveFolder = saveFolder + (ends_with(saveFolder, "/") ? "" : "/");
 	if (song != "") {
 		get_lyrics(song, saveFile, print);
 	} else if ((song = args["--download"].asString()) != "") {
 		std::cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<std::endl
 	         <<std::endl;
-		download_song(apikey, song, saveFolder, verbose);
+		download_song(apikey, song, saveFolder, verbose, stats);
+	} else if ((song = args["--play"].asString()) != "") {
+		play_song(song, lyrics, playout);
 	} else {
-		download_songs(apikey, songList, saveFolder, verbose);
-		print_statistics();
+		download_songs(apikey, songList, saveFolder, verbose, stats);
+		print_statistics(stats);
 	}
 	return 0;
 }
