@@ -20,4 +20,7 @@ extern float num_words_in_common(const std::string& str1, const std::string& str
 extern float title_distance(const std::string& str1, const std::string& str2);
 extern void write_to_mp3(const std::string& title, const std::string& data, bool verbose);
 extern void save_lyrics(const std::string& path, const std::string& data);
+extern bool read_file(const std::string& path, std::string& data);
 extern std::unordered_set<std::string> match_regex(const std::string& text, const std::string& regex, int maxMatches, int index = 0);
+extern unsigned int rev_bytes(unsigned int num);
+extern unsigned int from_synchsafe(unsigned int num);

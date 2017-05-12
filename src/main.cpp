@@ -16,7 +16,7 @@ Usage:
   {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
   {progName} --lyrics SONG [--save FILE] [--hide]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
-  {progName} --play FILE [--show-lyrics] [--show-play-output]
+  {progName} --play FILES... [--show-lyrics] [--show-play-output]
 
 Options:
   -h --help             Prints this message.
@@ -27,7 +27,7 @@ Options:
   --save FILE           File to save the lyrics to [default: ]
   --hide                Doesn't print the lyrics to the terminal
   --download SONG       Downloads a single song [default: ]
-  --play FILE           Plays a song from an .mp3 file
+  --play FILES...       List of MP3 files to play
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
 )";
@@ -152,6 +152,7 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 	std::string lyrics;
 	for (auto it = links.begin(); it != links.end() && !found; ++it) {
 		const auto url = *it;
+
 		if (ends_with(url, ".")) {
 			continue;
 		} else if (starts_with(url, "metrolyrics")) {
@@ -178,9 +179,56 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 	}
 }
 
-// Will this work on OS's other than Ubuntu?
+bool read_tag(const std::string& data, std::string& title, std::string& artist) {
+	static const int HEADER_SIZE = 10;
+
+	bool extendedHeader = data[5] & 0x40;
+	// If this isn't a clear line, I don't know what is
+	int size = from_synchsafe(rev_bytes(*(int*)&data[6]));
+	int offset = extendedHeader ? from_synchsafe(rev_bytes(*(int*)&data[HEADER_SIZE])) : 0;
+
+	for (int pos = HEADER_SIZE+offset; pos < HEADER_SIZE+size;) {
+		std::string frameID = data.substr(pos, 4);
+		int frame_size = from_synchsafe(rev_bytes(*(int*)&data[pos+4]));
+
+		// offset by 1 to ignore encoding byte
+		if (frameID == "TIT2") title = trim(data.substr(pos+HEADER_SIZE+1, frame_size-1));
+		else if (frameID == "TPE1") artist = trim(data.substr(pos+HEADER_SIZE+1, frame_size-1));
+
+		pos += frame_size + HEADER_SIZE;
+	}
+
+	return title != "" && artist != "";
+}
+
 void play_song(const std::string& file, bool show_lyrics, bool show_output) {
-	
+	std::cout<<"Playing "<<file<<std::endl;
+
+	if (!ends_with(file, ".mp3")) {
+		std::cout<<"Must supply an MP3 file"<<std::endl;
+		return;
+	} else if (show_lyrics) {
+		std::string data;
+		if (!read_file(file, data)) {
+			// If we can't read file, play probably can't either, so exit
+			std::cout<<"Could not read file"<<std::endl;
+			return;
+		}
+
+		// If something goes wrong with lyrics, can still play song
+		std::string title, artist;
+		if (!starts_with(data, "ID3")) {
+			std::cout<<"MP3 file must use ID3v2 tag if you want lyrics"<<std::endl;
+		} else if (!read_tag(data, title, artist)) {
+			std::cout<<"Could not extract title and artist information from MP3"<<std::endl;
+		} else {
+			std::cout<<"The song is \""<<title<<"\" by \""<<artist<<"\""<<std::endl;
+			get_lyrics(artist + " " + title, "", true);
+		}
+	}
+
+	// TODO: make this line OS agnostic
+	system(("play " + file + (show_output ? "" : " -q")).c_str());
 }
 
 int main(int argc, char** argv) {
@@ -197,6 +245,7 @@ int main(int argc, char** argv) {
 		 verbose = args["--verbose"].asBool(),
 		 lyrics = args["--show-lyrics"].asBool(),
 		 playout = args["--show-play-output"].asBool();
+	std::vector<std::string> songs = args["--play"].asStringList();
 
 	std::map<std::string, std::set<std::string>> stats;
 	saveFolder = saveFolder + (ends_with(saveFolder, "/") ? "" : "/");
@@ -206,8 +255,10 @@ int main(int argc, char** argv) {
 		std::cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<std::endl
 	         <<std::endl;
 		download_song(apikey, song, saveFolder, verbose, stats);
-	} else if ((song = args["--play"].asString()) != "") {
-		play_song(song, lyrics, playout);
+	} else if (!songs.empty()) {
+		for (int i = 0; i < songs.size(); i++) {
+			play_song(songs[i], lyrics, playout);
+		}
 	} else {
 		download_songs(apikey, songList, saveFolder, verbose, stats);
 		print_statistics(stats);

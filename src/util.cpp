@@ -73,7 +73,7 @@ std::string replace_all(const std::string& str, const std::vector<std::vector<st
 }
 
 std::string trim(const std::string& str) {
-	static const std::string whitespace = " \t\n";
+	static const std::string whitespace = " \t\n\0";
 
 	auto begin = str.find_first_not_of(whitespace);
 	auto end = str.find_last_not_of(whitespace);
@@ -193,6 +193,18 @@ void save_lyrics(const std::string& path, const std::string& data) {
 	file.close();
 }
 
+bool read_file(const std::string& path, std::string& data) {
+	std::ifstream file(path.c_str());
+	if (!file) return false;
+
+	file.seekg(0, file.end);
+	data.resize(file.tellg());
+	file.seekg(0, file.beg);
+
+	file.read(&data[0], data.capacity());
+	return true;
+}
+
 std::unordered_set<std::string> match_regex(const std::string& text, const std::string& regex, int maxMatches, int index) {
 	std::string search = text;
 	std::regex re_links(regex);
@@ -204,4 +216,16 @@ std::unordered_set<std::string> match_regex(const std::string& text, const std::
 		search = match.suffix().str();
 	}
 	return matches;
+}
+
+unsigned int rev_bytes(unsigned int num) {
+	unsigned int bytes[] = {num & 0xFF, (num & 0xFF00) >> 8, 
+							(num & 0xFF0000) >> 16, (num & 0xFF000000) >> 24};
+	return bytes[3] | (bytes[2] << 8) | (bytes[1] << 16) | (bytes[0] << 24);
+}
+
+unsigned int from_synchsafe(unsigned int num) {
+	unsigned int bytes[] = {num & 0xFF, (num & 0xFF00), 
+							(num & 0xFF0000), (num & 0xFF000000)};
+	return bytes[0] | (bytes[1] >> 1) | (bytes[2] >> 2) | (bytes[3] >> 3);
 }

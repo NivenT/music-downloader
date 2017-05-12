@@ -27,17 +27,20 @@ Usage:
   ./music-downloader [--songs FILE] [--dest FOLDER] [-v | --verbose]
   ./music-downloader --lyrics SONG [--save FILE] [--hide]
   ./music-downloader --download SONG [--dest FOLDER] [-v | --verbose]
+  ./music-downloader --play FILES... [--show-lyrics] [--show-play-output]
 
 Options:
-  -h --help         Prints this message.
-  --songs FILE      Text file containing songs to download [default: songs.txt]
-  --dest FOLDER	    Destination folder (where downloaded songs are saved) [default: songs/]
-  -v --verbose      Use verbose output
-  --lyrics SONG     Name of song to find the lyrics of [default: ]
-  --save FILE       File to save the lyrics to [default: ]
-  --hide            Doesn't print the lyrics to the terminal
-  --download SONG   Downloads a single song [default: ]
-
+  -h --help             Prints this message.
+  --songs FILE          Text file containing songs to download [default: songs.txt]
+  --dest FOLDER         Destination folder (where downloaded songs are saved) [default: songs/]
+  -v --verbose          Use verbose output
+  --lyrics SONG         Name of song to find the lyrics of [default: ]
+  --save FILE           File to save the lyrics to [default: ]
+  --hide                Doesn't print the lyrics to the terminal
+  --download SONG       Downloads a single song [default: ]
+  --play FILES...       List of MP3 files to play
+  --show-lyrics         Prints lyrics of song to the screen
+  --show-play-output    Does not use quiet flag when running play command
 ```
 Examples include
 
@@ -45,10 +48,13 @@ Examples include
 * `./music-downloader --lyrics "Thriller"` This will search for the song Thriller and print its lyrics
 * `./music-downloader --dest music -v` This will download all the songs in songs.txt and save them in a folder named music. It will also print verbose output.
 * `./music-downloader --download "Thriller"` This will download Thriller and save is in a folder names songs.
+* `./music-downloader --play songs/thriller.mp3 --show-lyrics` This will play Thriller from a local MP3 file, as well as search for and print its lyrics to the terminal.
 
 ## Details
 - The program retrieves the top 3 results for each song, and selects one to download
-- Lyrics searching is still a work in progress
+- You can specify `--play` multiple times, but each time only gets one file
+  - `./music-downloader --play thriller.mp3 --play manmirror.mp3` is acceptable
+  - `./music-downloader --play thriller.mp3 manmirror.mp3` is not acceptable
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do
