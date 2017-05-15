@@ -39,7 +39,7 @@ void download_song(const std::string& apikey, const std::string& song, const std
 	std::string songId, songTitle;
 	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
-	std::string fileTitle = saveFolder + replace_all(songTitle, {{"/"}, {".", "|", ":", "\"", "'"}}, {"_", ""});
+	std::string fileTitle = saveFolder + replace_all(songTitle, {{"/"}, {".", "|", ":", "\"", "'", "(", ")"}}, {"_", ""});
 	std::string match;
 
 	if (songId == "") {
@@ -198,8 +198,8 @@ bool read_tag(const std::string& data, std::string& title, std::string& artist) 
 		pos += frame_size + HEADER_SIZE;
 	}
 
-	return title != "" && artist != "";
-}
+	return title != "" /* && artist != "" */; // Just title might be enough
+} 
 
 void play_song(const std::string& file, bool show_lyrics, bool show_output) {
 	std::cout<<"Playing "<<file<<std::endl;
@@ -222,8 +222,8 @@ void play_song(const std::string& file, bool show_lyrics, bool show_output) {
 		} else if (!read_tag(data, title, artist)) {
 			std::cout<<"Could not extract title and artist information from MP3"<<std::endl;
 		} else {
-			std::cout<<"The song is \""<<title<<"\" by \""<<artist<<"\""<<std::endl;
-			get_lyrics(artist + " " + title, "", true);
+			std::cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unkown" : artist)<<"\""<<std::endl;
+			get_lyrics(trim(artist + " " + title), "", true);
 		}
 	}
 
@@ -231,10 +231,26 @@ void play_song(const std::string& file, bool show_lyrics, bool show_output) {
 	system(("play " + file + (show_output ? "" : " -q")).c_str());
 }
 
+std::vector<char*> splitPlayArgs(int argc, char** argv) {
+	std::vector<char*> args;
+	for (int i = 0; i < argc; i++) {
+		if (strcmp(argv[i], "--play") == 0) {
+			while (argv[++i] && !starts_with(argv[i], "-")) {
+				args.push_back(((char*)"--play"));
+				args.push_back(argv[i]);
+			}
+		}
+		args.push_back(argv[i]);
+	}
+	return args;
+}
+
 int main(int argc, char** argv) {
+	auto vargv = splitPlayArgs(argc, argv);
+
 	std::map<std::string, docopt::value> args =
 		docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
-		               {argv+1, argv+argc});
+		               {vargv.data()+1, vargv.data() + vargv.size()});
 
 	std::string apikey = "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc", 
 				songList = args["--songs"].asString(), 
