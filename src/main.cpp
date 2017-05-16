@@ -20,7 +20,7 @@ Usage:
   {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
   {progName} --lyrics SONG [--save FILE] [--hide]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
-  {progName} --play FILES... [--show-lyrics] [--show-play-output]
+  {progName} --play FILES... --dir FOLDER [--show-lyrics] [--show-play-output]
 
 Options:
   -h --help             Prints this message.
@@ -32,6 +32,7 @@ Options:
   --hide                Doesn't print the lyrics to the terminal
   --download SONG       Downloads a single song [default: ]
   --play FILES...       List of MP3 files to play
+  --dir FOLDER          The folder containing the files to play [default: .]
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
 )";
@@ -150,7 +151,7 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
 	static const int NUM_RESULTS = 25;
 
 	cout<<"Searching for the lyrics of \""<<song<<"\""<<endl
-	         <<endl;
+	    <<endl;
 
 	string search_results = search_duckduckgo(song + " lyrics");
 	auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)", NUM_RESULTS);
@@ -260,18 +261,23 @@ int main(int argc, char** argv) {
 		               {vargv.data()+1, vargv.data() + vargv.size()});
 
 	string apikey = "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc", 
-				songList = args["--songs"].asString(), 
-				saveFolder = args["--dest"].asString(),
-				song = args["--lyrics"].asString(),
-				saveFile = args["--save"].asString();
+		   songList = args["--songs"].asString(), 
+	       saveFolder = args["--dest"].asString(),
+		   song = args["--lyrics"].asString(),
+		   saveFile = args["--save"].asString(),
+		   songFolder = args["--dir"].asString();
+
 	bool print = !args["--hide"].asBool(),
 		 verbose = args["--verbose"].asBool(),
 		 lyrics = args["--show-lyrics"].asBool(),
 		 playout = args["--show-play-output"].asBool();
+
 	vector<string> songs = args["--play"].asStringList();
 
 	map<string, set<string>> stats;
-	saveFolder = saveFolder + (ends_with(saveFolder, "/") ? "" : "/");
+	saveFolder += ends_with(saveFolder, "/") ? "" : "/";
+	songFolder += ends_with(songFolder, "/") ? "" : "/"; 
+
 	if (song != "") {
 		get_lyrics(song, saveFile, print);
 	} else if ((song = args["--download"].asString()) != "") {
@@ -280,7 +286,7 @@ int main(int argc, char** argv) {
 		download_song(apikey, song, saveFolder, verbose, stats);
 	} else if (!songs.empty()) {
 		for (int i = 0; i < songs.size(); i++) {
-			play_song(songs[i], lyrics, playout);
+			play_song(songFolder + songs[i], lyrics, playout);
 		}
 	} else {
 		download_songs(apikey, songList, saveFolder, verbose, stats);
