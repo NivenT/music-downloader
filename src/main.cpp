@@ -8,6 +8,10 @@
 #include "youtube.h"
 #include "lyrics.h"
 
+#define ILLEGAL_CHARCTERS {".", "|", ":", "\"", "'", "(", ")", "&", "[", "]"}
+
+using namespace std;
+
 static const char* USAGE =
 R"({progName}
 
@@ -32,49 +36,49 @@ Options:
   --show-play-output    Does not use quiet flag when running play command
 )";
 
-void download_song(const std::string& apikey, const std::string& song, const std::string& saveFolder, 
-					bool verbose, std::map<std::string, std::set<std::string>>& stats) {
+void download_song(const string& apikey, const string& song, const string& saveFolder, 
+					bool verbose, map<string, set<string>>& stats) {
 	static const float SIMILARITY_THRESHOLD = 0.63;
 
-	std::string songId, songTitle;
-	std::tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
+	string songId, songTitle;
+	tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
 
-	std::string fileTitle = saveFolder + replace_all(songTitle, {{"/"}, {".", "|", ":", "\"", "'", "(", ")"}}, {"_", ""});
-	std::string match;
+	string fileTitle = saveFolder + replace_all(songTitle, {{"/", "\\"}, ILLEGAL_CHARCTERS}, {"_", ""});
+	string match;
 
 	if (songId == "") {
-		std::cout<<"\""<<song<<"\" could not be found"<<std::endl;
+		cout<<"\""<<song<<"\" could not be found"<<endl;
 
 		stats["not found"].insert(song);
 	} else if (song_exists(fileTitle)) {
-		std::cout<<"\""<<song<<"\" has already been downloaded"<<std::endl;
+		cout<<"\""<<song<<"\" has already been downloaded"<<endl;
 
 		stats["already existed"].insert(song);
 	} else if ((match = song_probably_exists(fileTitle, saveFolder)) != "") {
-		std::cout<<"\""<<song<<"\" has likely already been downloaded"<<std::endl
-				 <<"\""<<match<<"\" was found which is a close match"<<std::endl;
+		cout<<"\""<<song<<"\" has likely already been downloaded"<<endl
+			<<"\""<<match<<"\" was found which is a close match"<<endl;
 
 		stats["probably already existed, and so were not downloaded"].insert(song + " -> " + match);
 	} else {
 		if (verbose) {
-			std::cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<std::endl;
+			cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<endl;
 		}
 
-		const std::string downloadUrl = youtube_to_download(songId);
+		const string downloadUrl = youtube_to_download(songId);
 		if (downloadUrl == "") {
-			std::cout<<"Could not find song"<<std::endl
-					 <<std::endl;
+			cout<<"Could not find song"<<endl
+				<<endl;
 
 			stats["not found"].insert(song);
 			return;
 		} else if (verbose) {
-			std::cout<<TAB<<"Donwload url: "<<downloadUrl<<std::endl;
+			cout<<TAB<<"Donwload url: "<<downloadUrl<<endl;
 		}
 
-		std::string songData; bool succ;
-		std::tie(succ, songData) = download_song(downloadUrl);
+		string songData; bool succ;
+		tie(succ, songData) = download_song(downloadUrl);
 		if (succ) {
-			std::cout<<"Successfully downloaded "<<songTitle<<std::endl;
+			cout<<"Successfully downloaded "<<songTitle<<endl;
 		  	write_to_mp3(fileTitle, songData, verbose);
 
 		  	if (title_distance(song, songTitle) >= SIMILARITY_THRESHOLD) {
@@ -83,95 +87,98 @@ void download_song(const std::string& apikey, const std::string& song, const std
 		  		stats["successfully downloaded"].insert(song);
 		  	}
 		} else {
-			std::cout<<"Failed to download "<<songTitle<<std::endl;
+			cout<<"Failed to download "<<songTitle<<endl;
 
 			stats["could not be downloaded"].insert(song);
 		}
 	}
 }
 
-void download_songs(const std::string& apikey, const std::string& songList, const std::string& saveFolder, 
-					bool verbose, std::map<std::string, std::set<std::string>>& stats) {
-	std::cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<std::endl
-			 <<std::endl;
+void download_songs(const string& apikey, const string& songList, const string& saveFolder, 
+					bool verbose, map<string, set<string>>& stats) {
+	cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<endl
+			 <<endl;
 
-	std::ifstream songFile(songList.c_str());
+	ifstream songFile(songList.c_str());
 
-	std::string song;
-	while (std::getline(songFile, song)) {
+	string song;
+	while (getline(songFile, song)) {
 		if (!starts_with(song, "added on:")) {
+			// just to make sure statistics print in alphabetical order
+			transform(song.begin(), song.end(), song.begin(), ::tolower);
+
 			download_song(apikey, song, saveFolder, verbose, stats);
-			std::cout<<std::endl;
+			cout<<endl;
 		}
 	}
 }
 
-void print_statistics(std::map<std::string, std::set<std::string>> stats) {
-	static const int PRINT_THRESHOLD = 10;
+void print_statistics(map<string, set<string>> stats) {
+	static const int PRINT_THRESHOLD = 15;
 
-	std::cout<<"*******Download summary*******"<<std::endl
-			 <<std::endl;
+	cout<<"*******Download summary*******"<<endl
+			 <<endl;
 	for (const auto& pair : stats) {
-		const std::string& msg = pair.first;
-		const std::set<std::string>& data = pair.second;
+		const string& msg = pair.first;
+		const set<string>& data = pair.second;
 
-		std::cout<<data.size()<<" songs "<<msg<<". They were:"<<std::endl;
+		cout<<data.size()<<" songs "<<msg<<". They were:"<<endl;
 		if (data.size() <= PRINT_THRESHOLD) {
 			for (const auto& song : data) {
-				std::cout<<TAB<<song<<std::endl;
+				cout<<TAB<<song<<endl;
 			}
 		} else {
 			int nend = 0.3*PRINT_THRESHOLD;
 			int count = PRINT_THRESHOLD-nend;
 
 			for (auto it = data.begin(); count > 0; ++it, --count) {
-				std::cout<<TAB<<(*it)<<std::endl;
+				cout<<TAB<<(*it)<<endl;
 			}
-			std::cout<<TAB<<"."<<std::endl
-					 <<TAB<<"."<<std::endl
-					 <<TAB<<"."<<std::endl;
-			// Reverse alphabetical order because its easier
-			for (auto it = data.end(); nend > 0; --nend) {
-				std::cout<<TAB<<*(--it)<<std::endl;
-			}
+			cout<<TAB<<"."<<endl
+				<<TAB<<"."<<endl
+				<<TAB<<"."<<endl;
+
+			auto it = data.begin();
+			for (int skip = data.size() - nend; skip > 0; ++it, --skip);
+			while (nend-- > 0) cout<<TAB<<*(it++)<<endl;
 		}
-		std::cout<<std::endl;
+		cout<<endl;
 	}
 }
 
-void get_lyrics(const std::string& song, const std::string& saveFile, bool print) {
+void get_lyrics(const string& song, const string& saveFile, bool print) {
 	static const int NUM_RESULTS = 25;
 
-	std::cout<<"Searching for the lyrics of \""<<song<<"\""<<std::endl
-	         <<std::endl;
+	cout<<"Searching for the lyrics of \""<<song<<"\""<<endl
+	         <<endl;
 
-	std::string search_results = search_duckduckgo(song + " lyrics");
+	string search_results = search_duckduckgo(song + " lyrics");
 	auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)", NUM_RESULTS);
 
 	bool found = false;
-	std::string lyrics;
+	string lyrics;
 	for (auto it = links.begin(); it != links.end() && !found; ++it) {
 		const auto url = *it;
 
 		if (ends_with(url, ".")) {
 			continue;
 		} else if (starts_with(url, "metrolyrics")) {
-			std::tie(found, lyrics) = get_metrolyrics(url);
+			tie(found, lyrics) = get_metrolyrics(url);
 		} else if (starts_with(url, "genius")) {
-			std::tie(found, lyrics) = get_genius(url);
+			tie(found, lyrics) = get_genius(url);
 		} else if (starts_with(url, "lyricsbox")) {
-			std::tie(found, lyrics) = get_lyricsbox(url);
+			tie(found, lyrics) = get_lyricsbox(url);
 		} else if (starts_with(url, "songlyrics")) {
-			std::tie(found, lyrics) = get_songlyrics(url);
+			tie(found, lyrics) = get_songlyrics(url);
 		}
 	}
 
 	if (!found) {
-		std::cout<<"Unable to find lyrics"<<std::endl;
+		cout<<"Unable to find lyrics"<<endl;
 	} else {
 		if (print) {
-			std::cout<<lyrics<<std::endl
-					 <<std::endl;
+			cout<<lyrics<<endl
+					 <<endl;
 		}
 		if (saveFile != "") {
 			save_lyrics(saveFile, lyrics);
@@ -179,7 +186,7 @@ void get_lyrics(const std::string& song, const std::string& saveFile, bool print
 	}
 }
 
-bool read_tag(const std::string& data, std::string& title, std::string& artist) {
+bool read_tag(const string& data, string& title, string& artist) {
 	static const int HEADER_SIZE = 10;
 
 	bool extendedHeader = data[5] & 0x40;
@@ -188,7 +195,7 @@ bool read_tag(const std::string& data, std::string& title, std::string& artist) 
 	int offset = extendedHeader ? from_synchsafe(rev_bytes(*(int*)&data[HEADER_SIZE])) : 0;
 
 	for (int pos = HEADER_SIZE+offset; pos < HEADER_SIZE+size;) {
-		std::string frameID = data.substr(pos, 4);
+		string frameID = data.substr(pos, 4);
 		int frame_size = from_synchsafe(rev_bytes(*(int*)&data[pos+4]));
 
 		// offset by 1 to ignore encoding byte
@@ -201,28 +208,28 @@ bool read_tag(const std::string& data, std::string& title, std::string& artist) 
 	return title != "" /* && artist != "" */; // Just title might be enough
 } 
 
-void play_song(const std::string& file, bool show_lyrics, bool show_output) {
-	std::cout<<"Playing "<<file<<std::endl;
+void play_song(const string& file, bool show_lyrics, bool show_output) {
+	cout<<"Playing "<<file<<endl;
 
 	if (!ends_with(file, ".mp3")) {
-		std::cout<<"Must supply an MP3 file"<<std::endl;
+		cout<<"Must supply an MP3 file"<<endl;
 		return;
 	} else if (show_lyrics) {
-		std::string data;
+		string data;
 		if (!read_file(file, data)) {
 			// If we can't read file, play probably can't either, so exit
-			std::cout<<"Could not read file"<<std::endl;
+			cout<<"Could not read file"<<endl;
 			return;
 		}
 
 		// If something goes wrong with lyrics, can still play song
-		std::string title, artist;
+		string title, artist;
 		if (!starts_with(data, "ID3")) {
-			std::cout<<"MP3 file must use ID3v2 tag if you want lyrics"<<std::endl;
+			cout<<"MP3 file must use ID3v2 tag if you want lyrics"<<endl;
 		} else if (!read_tag(data, title, artist)) {
-			std::cout<<"Could not extract title and artist information from MP3"<<std::endl;
+			cout<<"Could not extract title and artist information from MP3"<<endl;
 		} else {
-			std::cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unkown" : artist)<<"\""<<std::endl;
+			cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unkown" : artist)<<"\""<<endl;
 			get_lyrics(trim(artist + " " + title), "", true);
 		}
 	}
@@ -231,8 +238,8 @@ void play_song(const std::string& file, bool show_lyrics, bool show_output) {
 	system(("play " + file + (show_output ? "" : " -q")).c_str());
 }
 
-std::vector<char*> splitPlayArgs(int argc, char** argv) {
-	std::vector<char*> args;
+vector<char*> splitPlayArgs(int argc, char** argv) {
+	vector<char*> args;
 	for (int i = 0; i < argc; i++) {
 		if (strcmp(argv[i], "--play") == 0) {
 			while (argv[++i] && !starts_with(argv[i], "-")) {
@@ -248,11 +255,11 @@ std::vector<char*> splitPlayArgs(int argc, char** argv) {
 int main(int argc, char** argv) {
 	auto vargv = splitPlayArgs(argc, argv);
 
-	std::map<std::string, docopt::value> args =
+	map<string, docopt::value> args =
 		docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
 		               {vargv.data()+1, vargv.data() + vargv.size()});
 
-	std::string apikey = "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc", 
+	string apikey = "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc", 
 				songList = args["--songs"].asString(), 
 				saveFolder = args["--dest"].asString(),
 				song = args["--lyrics"].asString(),
@@ -261,15 +268,15 @@ int main(int argc, char** argv) {
 		 verbose = args["--verbose"].asBool(),
 		 lyrics = args["--show-lyrics"].asBool(),
 		 playout = args["--show-play-output"].asBool();
-	std::vector<std::string> songs = args["--play"].asStringList();
+	vector<string> songs = args["--play"].asStringList();
 
-	std::map<std::string, std::set<std::string>> stats;
+	map<string, set<string>> stats;
 	saveFolder = saveFolder + (ends_with(saveFolder, "/") ? "" : "/");
 	if (song != "") {
 		get_lyrics(song, saveFile, print);
 	} else if ((song = args["--download"].asString()) != "") {
-		std::cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<std::endl
-	         <<std::endl;
+		cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<endl
+	         <<endl;
 		download_song(apikey, song, saveFolder, verbose, stats);
 	} else if (!songs.empty()) {
 		for (int i = 0; i < songs.size(); i++) {

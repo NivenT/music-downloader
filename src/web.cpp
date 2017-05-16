@@ -6,45 +6,46 @@
 #include "web.h"
 
 using json = nlohmann::json;
+using namespace std;
 
 // Is server even the right name for that argument?
-bool check_successful_response(const cpr::Response& response, const std::string& server) {
+bool check_successful_response(const cpr::Response& response, const string& server) {
 	if (!response.status_code) {
-		std::cout<<"Error occured ("<<(int)response.error.code<<"):"<<std::endl
-				 <<response.error.message<<std::endl
-				 <<std::endl
-				 <<"Exiting program"<<std::endl
-				 <<std::endl;
+		cout<<"Error occured ("<<(int)response.error.code<<"):"<<endl
+			<<response.error.message<<endl
+			<<endl
+			<<"Exiting program"<<endl
+			<<endl;
 		exit(0xBAD);
 	} else if (response.status_code/100 == 4) {
-		std::cout<<server<<" response ("<<response.status_code<<"):"<<std::endl
-				 <<response.text<<std::endl
-				 <<std::endl
-				 <<"Exiting program"<<std::endl
-				 <<std::endl;
+		cout<<server<<" response ("<<response.status_code<<"):"<<endl
+			<<response.text<<endl
+			<<endl
+			<<"Exiting program"<<endl
+			<<endl;
 		exit(0xBAD);
 	} else if (response.status_code/100 != 2) {
-		std::cout<<server<<" response ("<<response.status_code<<"):"<<std::endl
-				 <<response.text<<std::endl
-				 <<std::endl;
+		cout<<server<<" response ("<<response.status_code<<"):"<<endl
+			<<response.text<<endl
+			<<endl;
 		return false;
 	}
 	return true;
 }
 
-std::string construct_query(const json& request, const std::vector<std::string>& keys) {
-	std::string query = "";
+string construct_query(const json& request, const vector<string>& keys) {
+	string query = "";
 	for (const auto key : keys) {
-		std::string value = request[key];
+		string value = request[key];
 		query += key + "=" + value + "&";
 	}
 	return query;
 }
 
-std::tuple<bool, std::string> download_song(const std::string& url) {
+tuple<bool, string> download_song(const string& url) {
 	static const int MAX_NUM_ATTEMPTS = 100;
 
-	static const auto doAgain = [](const std::string& mp3) {
+	static const auto doAgain = [](const string& mp3) {
 		// Magic number is hopefully not so magic
 		return starts_with(trim(mp3), "<html>") || mp3.size() < 100*1024;
 	};
@@ -54,26 +55,26 @@ std::tuple<bool, std::string> download_song(const std::string& url) {
 		response = cpr::Get(cpr::Url{url});
 	}
 	// check_successful_response here may not be needed
-	return std::make_tuple(!fail && check_successful_response(response, "YouTubeInMP3"), response.text);
+	return make_tuple(!fail && check_successful_response(response, "YouTubeInMP3"), response.text);
 }
 
-std::string search_duckduckgo(const std::string& query) {
-	std::string url = "https://duckduckgo.com/html/?q=" + urlify(query);
+string search_duckduckgo(const string& query) {
+	string url = "https://duckduckgo.com/html/?q=" + urlify(query);
 
-	std::cout<<"DuckDuckGo URL: "<<url<<std::endl;
+	cout<<"DuckDuckGo URL: "<<url<<endl;
 	auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
 	return check_successful_response(response, "DuckDuckGo") ? response.text : "";
 }
 
-std::string remove_html_tags(const std::string& html, const std::string& rpl) {
-	std::string tagless = html;
+string remove_html_tags(const string& html, const string& rpl) {
+	string tagless = html;
 
 	int pos = 0;
 	// Terrible way to do this, I think
-	while ((pos = tagless.find('<', pos)) != std::string::npos) {
+	while ((pos = tagless.find('<', pos)) != string::npos) {
 		int end = tagless.find('>', pos);
 
-		std::string tag = tagless.substr(pos, end-pos+1);
+		string tag = tagless.substr(pos, end-pos+1);
 		tagless.replace(pos, end-pos+1, tag == "<br>" ? "" : rpl);
 	}
 	return trim(tagless);
