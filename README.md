@@ -27,7 +27,7 @@ Usage:
   ./music-downloader [--songs FILE] [--dest FOLDER] [-v | --verbose]
   ./music-downloader --lyrics SONG [--save FILE] [--hide]
   ./music-downloader --download SONG [--dest FOLDER] [-v | --verbose]
-  ./music-downloader --play FILES... [--show-lyrics] [--show-play-output]
+  ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output]
 
 Options:
   -h --help             Prints this message.
@@ -39,6 +39,7 @@ Options:
   --hide                Doesn't print the lyrics to the terminal
   --download SONG       Downloads a single song [default: ]
   --play FILES...       List of MP3 files to play
+  --dir FOLDER          The folder containing the files to play [default: .]
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
 ```
@@ -50,11 +51,23 @@ Examples include
 * `./music-downloader --download "Thriller"` This will download Thriller and save is in a folder names songs.
 * `./music-downloader --play songs/thriller.mp3 --show-lyrics` This will play Thriller from a local MP3 file, as well as search for and print its lyrics to the terminal.
 
+## Advanced Examples
+
+You could run the below command to play every song in a folder in a random order, and have the program print the lyrics of each song before playing it.
+
+`./music-downloader --play $(ls songs | shuf) --dir songs --show-lyrics`
+
+Since song files may have hard to remember names, if you want to play specific songs without typing out annoying file names, you can also run a command like below.
+
+`./music-downloader --play mj/$(ls mj | grep -i thriller) kw/$(ls kw | grep -i stronger)`
+
+The above will search for a song with thriller (respectively, strong) in the title, and play it. Since the two songs were in different folders, instead of using "--dir", we have to include the folder with the name of the file.
+
 ## Details
 - The program retrieves the top 3 results for each song, and selects one to download
-- You can specify `--play` multiple times, but each time only gets one file
-  - `./music-downloader --play thriller.mp3 --play manmirror.mp3` is acceptable
-  - `./music-downloader --play thriller.mp3 manmirror.mp3` is not acceptable
+- You can specify `--play` multiple times. Either of the below is acceptable:
+  - `./music-downloader --play thriller.mp3 --play manmirror.mp3`
+  - `./music-downloader --play thriller.mp3 manmirror.mp3`
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do

@@ -20,7 +20,7 @@ Usage:
   {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
   {progName} --lyrics SONG [--save FILE] [--hide]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
-  {progName} --play FILES... --dir FOLDER [--show-lyrics] [--show-play-output]
+  {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output]
 
 Options:
   -h --help             Prints this message.
@@ -239,6 +239,7 @@ void play_song(const string& file, bool show_lyrics, bool show_output) {
 	system(("play " + file + (show_output ? "" : " -q")).c_str());
 }
 
+// TODO: Restructure this in a slightly cleaner way
 vector<char*> splitPlayArgs(int argc, char** argv) {
 	vector<char*> args;
 	for (int i = 0; i < argc; i++) {
@@ -248,14 +249,13 @@ vector<char*> splitPlayArgs(int argc, char** argv) {
 				args.push_back(argv[i]);
 			}
 		}
-		args.push_back(argv[i]);
+		if (i < argc) args.push_back(argv[i]);
 	}
 	return args;
 }
 
 int main(int argc, char** argv) {
 	auto vargv = splitPlayArgs(argc, argv);
-
 	map<string, docopt::value> args =
 		docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
 		               {vargv.data()+1, vargv.data() + vargv.size()});
