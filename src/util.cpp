@@ -115,6 +115,19 @@ string urlify(const string& query) {
 	return ret;
 }
 
+string shellify(const string& cmd) {
+	static const unordered_set<char> SPECIAL_CHARS{'&', '(', ')', '\"', '\''};
+
+	string ret = cmd;
+	for (int i = 0; i < ret.size(); ++i) {
+		if (SPECIAL_CHARS.find(ret[i]) != SPECIAL_CHARS.end()) {
+			ret.replace(i, 0, "\\");
+			i++;
+		}
+	}
+	return ret;
+}
+
 int levenshtein(const string& str1, const string& str2) {
 	int cost_matrix[str1.size()+1][str2.size()+1];
 	for (int i = 0; i <= str1.size(); ++i) {

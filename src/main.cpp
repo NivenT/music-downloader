@@ -235,8 +235,10 @@ void play_song(const string& file, bool show_lyrics, bool show_output) {
 		}
 	}
 
+	string cmd = "play " + shellify(file) + (show_output ? "" : " -q");
+	cout<<"Running command \""<<cmd<<"\""<<endl;
 	// TODO: make this line OS agnostic
-	system(("play " + file + (show_output ? "" : " -q")).c_str());
+	system(cmd.c_str());
 }
 
 // TODO: Restructure this in a slightly cleaner way
@@ -285,7 +287,10 @@ int main(int argc, char** argv) {
 	         <<endl;
 		download_song(apikey, song, saveFolder, verbose, stats);
 	} else if (!songs.empty()) {
+		static const string stars(100, '*');
+
 		for (int i = 0; i < songs.size(); i++) {
+			cout<<stars<<endl;
 			play_song(songFolder + songs[i], lyrics, playout);
 		}
 	} else {
