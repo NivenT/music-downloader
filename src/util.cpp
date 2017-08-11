@@ -100,7 +100,8 @@ string fileify(const string& title) {
 }
 
 string urlify(const string& query) {
-    static const unordered_set<char> SPECIAL_CHARS{'&', '/', ',', '$', '!', '?', ':', '=', '[', ']', '+', '(', ')', '\\', '{', '}', '\''};
+    // Maybe I should just convert anything that isn't alphanumeric just to be safe
+    static const unordered_set<char> SPECIAL_CHARS{'&', '/', ',', '$', '!', '?', ':', '=', '[', ']', '+', '(', ')', '\\', '{', '}', '\'', '#'};
 
     string ret = query;
     for (int i = 0; i < ret.size(); ++i) {

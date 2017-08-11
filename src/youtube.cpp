@@ -47,6 +47,9 @@ tuple<string, string> search_youtube_for_song(const string& song, const string& 
 
     string query = construct_query(request, {"part", "topicId", "maxResults", "type", "q", "key"});
     string url = "https://www.googleapis.com/youtube/v3/search?" + query;
+    if (verbose) {
+        cout<<TAB<<"api call: "<<url<<endl;
+    }
     
     auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
     if (check_successful_response(response, "YouTube")) {
