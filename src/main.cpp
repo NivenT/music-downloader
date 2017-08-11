@@ -164,15 +164,23 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
         if (ends_with(url, ".")) {
             continue;
         } else if (starts_with(url, "metrolyrics")) {
-            tie(found, lyrics) = get_metrolyrics(url);
+            tie(found, lyrics) = get_lyrics(url, "MetroLyrics", R"(<div id="lyrics-body-text")",
+                                             "</div>", "\n");
         } else if (starts_with(url, "genius")) {
-            tie(found, lyrics) = get_genius(url);
+            tie(found, lyrics) = get_lyrics(url, "Genius", R"(<div class="song_body-lyrics")",
+                                             "</div>");
+            if (ends_with(lyrics, "More on Genius")) {
+                lyrics = trim(lyrics.substr(0, lyrics.size()-14));
+            }
         } else if (starts_with(url, "lyricsbox")) {
-            tie(found, lyrics) = get_lyricsbox(url);
+            tie(found, lyrics) = get_lyrics(url, "LyricsBox", "<DIV id=lyrics", "</DIV>", 
+                                             "", true);
         } else if (starts_with(url, "songlyrics")) {
-            tie(found, lyrics) = get_songlyrics(url);
+            tie(found, lyrics) = get_lyrics(url, "SongLyrics", R"(<p id="songLyricsDiv")",
+                                             "</p>");
         } else if (starts_with(url, "langmanual")) {
-            tie(found, lyrics) = get_langmanual(url);
+            tie(found, lyrics) = get_lyrics(url, "LangManual", R"(<div class="livedescription")",
+                                             "</div>", "\n");
         }
     }
 

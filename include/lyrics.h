@@ -1,7 +1,5 @@
 #include <string>
 
-extern std::tuple<bool, std::string> get_metrolyrics(const std::string& url);
-extern std::tuple<bool, std::string> get_genius(const std::string& url);
-extern std::tuple<bool, std::string> get_lyricsbox(const std::string& url);
-extern std::tuple<bool, std::string> get_songlyrics(const std::string& url);
-extern std::tuple<bool, std::string> get_langmanual(const std::string& url);
+extern std::tuple<bool, std::string> get_lyrics(const std::string& url, const std::string& domain,
+												const std::string& beg_tag, const std::string& end_tag, 
+												const std::string& rpl = "", bool ugly_while_loop = false);
