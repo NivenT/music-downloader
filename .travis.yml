@@ -25,6 +25,7 @@ addons:
       - llvm-toolchain-precise
       - llvm-toolchain-precise-3.6
       - llvm-toolchain-precise-3.7
+	  - george-edison55-precise-backports
     packages:
       - g++-4.6
       - g++-4.7
@@ -35,13 +36,10 @@ addons:
       - valgrind
       - python-pip
       - python-yaml
+	  - cmake
+	  - cmake-data
 
 before_script:
-  - yes | sudo apt-get install software-properties-common
-  - yes | sudo add-apt-repository ppa:george-edison55/cmake-3.x
-  - yes | sudo apt-get update
-  - yes | sudo apt-get upgrade
-  # The above installs a later version of cmake
   - export CXX=$COMPILER CC=$CCOMPILER
   - cmake --version
   - mkdir build
