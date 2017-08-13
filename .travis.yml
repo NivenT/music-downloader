@@ -25,7 +25,7 @@ addons:
       - llvm-toolchain-precise
       - llvm-toolchain-precise-3.6
       - llvm-toolchain-precise-3.7
-	  - george-edison55-precise-backports
+      - george-edison55-precise-backports
     packages:
       - g++-4.6
       - g++-4.7
@@ -36,8 +36,8 @@ addons:
       - valgrind
       - python-pip
       - python-yaml
-	  - cmake
-	  - cmake-data
+      - cmake
+      - cmake-data
 
 before_script:
   - export CXX=$COMPILER CC=$CCOMPILER
