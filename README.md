@@ -68,6 +68,10 @@ The above will search for a song with thriller (respectively, strong) in the tit
 - You can specify `--play` multiple times. Either of the below is acceptable:
   - `./music-downloader --play thriller.mp3 --play manmirror.mp3`
   - `./music-downloader --play thriller.mp3 manmirror.mp3`
+- The program retrieves lyrics from multiple sites and only uses the longest one found
+  - This was added on a whim since I'd sometimes only get a snipped of lyrics so it comes with some annoyances I didn't want to fix immediately
+    - Namely, it prints "Retrieving lyrics from ..." multiple times
+    - Also, you cannot tell which url it ultimately used without checking them all yourself
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do

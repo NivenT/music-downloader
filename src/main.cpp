@@ -118,7 +118,7 @@ void print_statistics(map<string, set<string>> stats) {
     static const int PRINT_THRESHOLD = 15;
 
     cout<<"*******Download summary*******"<<endl
-             <<endl;
+        <<endl;
     for (const auto& pair : stats) {
         const string& msg = pair.first;
         const set<string>& data = pair.second;
@@ -157,8 +157,8 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
     auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)", NUM_RESULTS);
 
     bool found = false;
-    string lyrics;
-    for (auto it = links.begin(); it != links.end() && !found; ++it) {
+    string lyrics, best_lyrics;
+    for (auto it = links.begin(); it != links.end(); ++it) {
         const auto url = *it;
 
         if (ends_with(url, ".")) {
@@ -182,17 +182,19 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
             tie(found, lyrics) = get_lyrics(url, "LangManual", R"(<div class="livedescription")",
                                              "</div>", "\n");
         }
+
+        best_lyrics = lyrics.size() > best_lyrics.size() ? lyrics : best_lyrics;
     }
 
     if (!found) {
         cout<<"Unable to find lyrics"<<endl;
     } else {
         if (print) {
-            cout<<lyrics<<endl
-                     <<endl;
+            cout<<best_lyrics<<endl
+                <<endl;
         }
         if (saveFile != "") {
-            save_lyrics(saveFile, lyrics);
+            save_lyrics(saveFile, best_lyrics);
         }
     }
 }
