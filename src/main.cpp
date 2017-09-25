@@ -154,7 +154,7 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
         <<endl;
 
     string search_results = search_duckduckgo(song + " lyrics");
-    auto links = match_regex(search_results, R"([[:alpha:]]+\.com[[:alnum:]/\.-]+)", NUM_RESULTS);
+    auto links = match_regex(search_results, R"([[:alpha:]]+\.com[_[:alnum:]/\.-]+)", NUM_RESULTS);
 
     bool found = false;
     string lyrics, best_lyrics;
@@ -181,6 +181,9 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
         } else if (starts_with(url, "langmanual")) {
             tie(found, lyrics) = get_lyrics(url, "LangManual", R"(<div class="livedescription")",
                                              "</div>", "\n");
+        } else if (starts_with(url, "islandlyrics")) {
+            // not sure how well this will work in general
+            tie(found, lyrics) = get_lyrics(url, "IslandLyrics", "<h2>By <a", "<script");
         }
 
         // Should we keep track of the site the best lyrics came from?
