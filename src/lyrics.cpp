@@ -10,8 +10,7 @@ tuple<bool, string> get_lyrics(const string& url, const string& domain, const st
     if (check_successful_response(response, domain)) {
         int start = response.text.find(beg_tag);
         if (start != string::npos) {
-            cout<<"Retrieving lyrics from "<<domain<<" ("<<url<<")"<<endl
-                <<endl;
+            cout<<"Retrieving lyrics from "<<domain<<" ("<<url<<")"<<endl;
 
             int end = response.text.find(end_tag, start);
             while (ugly_while_loop && response.text[end-1] == '>') {

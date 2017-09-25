@@ -183,14 +183,19 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
                                              "</div>", "\n");
         }
 
+        // Should we keep track of the site the best lyrics came from?
         best_lyrics = lyrics.size() > best_lyrics.size() ? lyrics : best_lyrics;
     }
 
-    if (!found) {
+    // Best to change this to still make use of found in case it later becomes possible
+    // to return nonempty lyrics when they weren't found (i.e. if you instead found a
+    // message saying that the lyrics weren't available yet)
+    if (best_lyrics.size() == 0) {
         cout<<"Unable to find lyrics"<<endl;
     } else {
         if (print) {
-            cout<<best_lyrics<<endl
+            cout<<endl
+                <<best_lyrics<<endl
                 <<endl;
         }
         if (saveFile != "") {
