@@ -51,7 +51,7 @@ tuple<bool, string> download_song(const string& url) {
     };
 
     auto response = cpr::Get(cpr::Url{url}); bool fail;
-    for (int i = 0; fail = doAgain(response.text) && check_successful_response(response, "YouTubeInMP3") && i < MAX_NUM_ATTEMPTS; ++i) {
+    for (int i = 0; (fail = doAgain(response.text)) && check_successful_response(response, "YouTubeInMP3") && i < MAX_NUM_ATTEMPTS; ++i) {
         response = cpr::Get(cpr::Url{url});
     }
     // check_successful_response here may not be needed
