@@ -1,3 +1,5 @@
+// TODO: Organize code in the file/pull some functions out into their own file
+
 #include <iostream>
 #include <fstream>
 
@@ -13,7 +15,7 @@
 using namespace std;
 
 // TODO: Split the code here among several files
-
+// TODO: Add quiet flag
 static const char* USAGE =
 R"({progName}
 
@@ -37,10 +39,13 @@ Options:
   --dir FOLDER          The folder containing the files to play [default: .]
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
+  --add-lyrics          Adds the songs lyrics to the downloaded mp3 file
 )";
 
+bool add_lyrics_tag(string&);
+
 void download_song(const string& apikey, const string& song, const string& saveFolder, 
-                    bool verbose, map<string, set<string>>& stats) {
+                    bool verbose, bool add_lyrics, map<string, set<string>>& stats) {
     static const float SIMILARITY_THRESHOLD = 0.63;
 
     string songId, songTitle;
@@ -82,6 +87,14 @@ void download_song(const string& apikey, const string& song, const string& saveF
         tie(succ, songData) = download_song(downloadUrl);
         if (succ) {
             cout<<"Successfully downloaded "<<songTitle<<endl;
+
+            if (add_lyrics) {
+                if (!add_lyrics_tag(songData)) {
+                    cout<<"Failed to add lyrics to the mp3 file"<<endl;
+                } else if (verbose) {
+                    cout<<"Successfully added lyrics to the mp3 file"<<endl;
+                }
+            }
             write_to_mp3(fileTitle, songData, verbose);
 
             if (title_distance(song, songTitle) >= SIMILARITY_THRESHOLD) {
@@ -98,7 +111,7 @@ void download_song(const string& apikey, const string& song, const string& saveF
 }
 
 void download_songs(const string& apikey, const string& songList, const string& saveFolder, 
-                    bool verbose, map<string, set<string>>& stats) {
+                    bool verbose, bool add_lyrics, map<string, set<string>>& stats) {
     cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<endl
              <<endl;
 
@@ -110,7 +123,7 @@ void download_songs(const string& apikey, const string& songList, const string& 
             // just to make sure statistics print in alphabetical order
             transform(song.begin(), song.end(), song.begin(), ::tolower);
 
-            download_song(apikey, song, saveFolder, verbose, stats);
+            download_song(apikey, song, saveFolder, verbose, add_lyrics, stats);
             cout<<endl;
         }
     }
@@ -234,7 +247,8 @@ void find_lyrics(const string& song, const string& saveFile, bool print, bool ve
             save_lyrics(saveFile, best_lyrics);
         }
     }
-}
+    return best_lyrics;
+} 
 
 bool read_tag(const string& data, string& title, string& artist) {
     static const int HEADER_SIZE = 10;
@@ -256,7 +270,7 @@ bool read_tag(const string& data, string& title, string& artist) {
     }
 
     return title != "" /* && artist != "" */; // Just title might be enough
-} 
+}
 
 void play_song(const string& file, bool show_lyrics, bool show_output, bool verbose) {
     cout<<"Playing "<<file<<endl;
@@ -290,6 +304,42 @@ void play_song(const string& file, bool show_lyrics, bool show_output, bool verb
     system(cmd.c_str());
 }
 
+bool add_lyrics_tag(string& data) {
+    static const int HEADER_SIZE = 10;
+
+    // Note: Could only pass over header file once by adding lyrics to end instead of beginning
+    string title, artist;
+    if (!read_tag(data, title, artist)) {
+        cout<<"Could not extract title and artist information from MP3"<<endl;
+        return false;
+    }
+    string lyrics = get_lyrics(trim(artist + " " + title), "", false);
+    if (lyrics == "") {
+        cout<<"Could not find lyrics for the song"<<endl;
+        return false;
+    }
+
+    lyrics = replace_all(lyrics, "\n", "[CR][LF]\n");
+    lyrics += ends_with(lyrics, "[CR][LF]") ? "" : "[CR][LF]";
+    string lyrics_len = to_string(lyrics.size());
+    string lyrics_tag = 
+        string("LYRICSBEGIN\n") +
+        "IND000003\n" +
+        "100\n" +
+        "LYR" + string(5-lyrics_len.size(), '0') + lyrics_len + "\n" +
+        lyrics + "\n";
+    string lyrics_tag_len = to_string(lyrics_tag.size());
+    lyrics_tag += string(6-lyrics_tag_len.size(), '0') + lyrics_tag_len + "LYRICS200";
+
+    bool extendedHeader = data[5] & 0x40;
+    int size = from_synchsafe(rev_bytes(*(int*)&data[6]));
+    int offset = extendedHeader ? from_synchsafe(rev_bytes(*(int*)&data[HEADER_SIZE])) : 0;
+
+    data += lyrics_tag;
+
+    return true;
+}
+
 // TODO: Restructure this in a slightly cleaner way
 vector<char*> splitPlayArgs(int argc, char** argv) {
     vector<char*> args;
@@ -321,7 +371,8 @@ int main(int argc, char** argv) {
     bool print = !args["--hide"].asBool(),
          verbose = args["--verbose"].asBool(),
          lyrics = args["--show-lyrics"].asBool(),
-         playout = args["--show-play-output"].asBool();
+         playout = args["--show-play-output"].asBool(),
+         add_lyrics = args["--add-lyrics"].asBool();
 
     vector<string> songs = args["--play"].asStringList();
 
@@ -334,7 +385,7 @@ int main(int argc, char** argv) {
     } else if ((song = args["--download"].asString()) != "") {
         cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<endl
              <<endl;
-        download_song(apikey, song, saveFolder, verbose, stats);
+        download_song(apikey, song, saveFolder, verbose, add_lyrics, stats);
     } else if (!songs.empty()) {
         static const string stars(100, '*');
 
@@ -343,7 +394,7 @@ int main(int argc, char** argv) {
             play_song(songFolder + songs[i], lyrics, playout, verbose);
         }
     } else {
-        download_songs(apikey, songList, saveFolder, verbose, stats);
+        download_songs(apikey, songList, saveFolder, verbose, add_lyrics, stats);
         print_statistics(stats);
     }
     return 0;
