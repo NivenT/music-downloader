@@ -9,6 +9,8 @@ using namespace std;
 
 // TODO: Handle HTTP response code 3XX (i.e. redirect)
 string youtube_to_download(const string& id) {
+    return "http://www.convertmp3.io/fetch/?video=https://www.youtube.com/watch?v=" + id;
+    /*
     json request;
     request["video"] = "http://www.youtube.com/watch?v=" + id;
     request["autostart"] = "1";
@@ -18,14 +20,17 @@ string youtube_to_download(const string& id) {
 
     auto response = cpr::Get(cpr::Url{url});
     if (check_successful_response(response, "YouTubeInMP3")) {
-        auto links = match_regex(response.text, "href=\"([^\"]*)\"", -1, 1);
+        if (response.status_code/100 == 3) {
+            cout<<"Reminder: handle redirects"<<endl;
+        }
+
+        auto links = match_regex(response.text, "href=\"(/download[^\"]*)\"", -1, 1);
         for (const auto& link : links) {
-            if (starts_with(link, "/download")) {
-                return "http://www.convertmp3.io" + link;
-            }
+            return "http://www.convertmp3.io" + link;
         }
     }
     return "";
+    */
 }
 
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
