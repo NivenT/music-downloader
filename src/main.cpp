@@ -164,6 +164,7 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
     float best_score = 0;
     float scale = 1;
 
+    // The more I work on the project, the more ridiculous the code becomes
     for (auto it = links.begin(); it != links.end(); ++it) {
         const auto url = *it;
 
@@ -193,15 +194,19 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
         } else if (starts_with(url, "socalyrics")) {
             // ditto
             tie(found, lyrics, site) = get_lyrics(url, "SocaLyrics", R"(<div class="entry-content")", "</div>");
+            found = found && !starts_with(lyrics, "Bio");
+        } else {
+            continue;
         }
 
-        // The more I work on the project, the more ridiculous the code becomes
-        if (lyrics.size() * scale > best_score) {
-            best_score = lyrics.size() * scale;
-            best_lyrics = lyrics;
-            best_site = site;
+        if (found) {
+            if (lyrics.size() * scale > best_score) {
+                best_score = lyrics.size() * scale;
+                best_lyrics = lyrics;
+                best_site = site;
+            }
+            scale *= DECAY;
         }
-        scale *= DECAY;
     }
 
     // Best to change this to still make use of found in case it later becomes possible
