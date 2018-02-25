@@ -149,45 +149,59 @@ void print_statistics(map<string, set<string>> stats) {
 
 void get_lyrics(const string& song, const string& saveFile, bool print) {
     static const int NUM_RESULTS = 25;
+    static const float DECAY = 0.95;
 
     cout<<"Searching for the lyrics of \""<<song<<"\""<<endl
         <<endl;
 
     string search_results = search_duckduckgo(song + " lyrics");
-    auto links = match_regex(search_results, R"([[:alpha:]]+\.com[_[:alnum:]/\.-]+)", NUM_RESULTS);
+    auto links = match_regex(search_results, R"([[:alpha:]]+\.(com|net)[_[:alnum:]/\.-]+)", NUM_RESULTS);
 
     bool found = false;
+
     string lyrics, best_lyrics;
+    string site, best_site;
+    float best_score = 0;
+    float scale = 1;
+
     for (auto it = links.begin(); it != links.end(); ++it) {
         const auto url = *it;
 
         if (ends_with(url, ".")) {
             continue;
         } else if (starts_with(url, "metrolyrics")) {
-            tie(found, lyrics) = get_lyrics(url, "MetroLyrics", R"(<div id="lyrics-body-text")",
-                                             "</div>", "\n");
+            tie(found, lyrics, site) = get_lyrics(url, "MetroLyrics", R"(<div id="lyrics-body-text")",
+                                                  "</div>", "\n");
         } else if (starts_with(url, "genius")) {
-            tie(found, lyrics) = get_lyrics(url, "Genius", R"(<div class="song_body-lyrics")",
-                                             "</div>");
+            tie(found, lyrics, site) = get_lyrics(url, "Genius", R"(<div class="song_body-lyrics")",
+                                                  "</div>");
             if (ends_with(lyrics, "More on Genius")) {
                 lyrics = trim(lyrics.substr(0, lyrics.size()-14));
             }
         } else if (starts_with(url, "lyricsbox")) {
-            tie(found, lyrics) = get_lyrics(url, "LyricsBox", "<DIV id=lyrics", "</DIV>", 
-                                             "", true);
+            tie(found, lyrics, site) = get_lyrics(url, "LyricsBox", "<DIV id=lyrics", "</DIV>", 
+                                                  "", true);
         } else if (starts_with(url, "songlyrics")) {
-            tie(found, lyrics) = get_lyrics(url, "SongLyrics", R"(<p id="songLyricsDiv")",
-                                             "</p>");
+            tie(found, lyrics, site) = get_lyrics(url, "SongLyrics", R"(<p id="songLyricsDiv")",
+                                                  "</p>");
         } else if (starts_with(url, "langmanual")) {
-            tie(found, lyrics) = get_lyrics(url, "LangManual", R"(<div class="livedescription")",
-                                             "</div>", "\n");
+            tie(found, lyrics, site) = get_lyrics(url, "LangManual", R"(<div class="livedescription")",
+                                                  "</div>", "\n");
         } else if (starts_with(url, "islandlyrics")) {
             // not sure how well this will work in general
-            tie(found, lyrics) = get_lyrics(url, "IslandLyrics", "<h2>By <a", "<script");
+            tie(found, lyrics, site) = get_lyrics(url, "IslandLyrics", "<h2>By <a", "<script");
+        } else if (starts_with(url, "socalyrics")) {
+            // ditto
+            tie(found, lyrics, site) = get_lyrics(url, "SocaLyrics", R"(<div class="entry-content")", "</div>");
         }
 
-        // Should we keep track of the site the best lyrics came from?
-        best_lyrics = lyrics.size() > best_lyrics.size() ? lyrics : best_lyrics;
+        // The more I work on the project, the more ridiculous the code becomes
+        if (lyrics.size() * scale > best_score) {
+            best_score = lyrics.size() * scale;
+            best_lyrics = lyrics;
+            best_site = site;
+        }
+        scale *= DECAY;
     }
 
     // Best to change this to still make use of found in case it later becomes possible
@@ -198,6 +212,7 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
     } else {
         if (print) {
             cout<<endl
+                <<"Showing Lyrics from "<<best_site<<endl
                 <<best_lyrics<<endl
                 <<endl;
         }
