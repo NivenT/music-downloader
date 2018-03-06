@@ -18,7 +18,7 @@ R"({progName}
 Usage:
   {progName} (-h | --help)
   {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
-  {progName} --lyrics SONG [--save FILE] [--hide]
+  {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
   {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output]
 
@@ -147,7 +147,7 @@ void print_statistics(map<string, set<string>> stats) {
     }
 }
 
-void get_lyrics(const string& song, const string& saveFile, bool print) {
+void find_lyrics(const string& song, const string& saveFile, bool print, bool verbose) {
     static const int NUM_RESULTS = 25;
     static const float DECAY = 0.95;
 
@@ -161,6 +161,7 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
 
     string lyrics, best_lyrics;
     string site, best_site;
+    string best_url;
     float best_score = 0;
     float scale = 1;
 
@@ -200,10 +201,15 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
         }
 
         if (found) {
-            if (lyrics.size() * scale > best_score) {
-                best_score = lyrics.size() * scale;
+            // Should I use num_words_in_common instead of title_distance?
+            float score = lyrics.size() * scale / 
+                            title_distance(song, replace_all(url, {{"+","-","_","/","."}}, {" "}));
+            if (verbose) cout<<TAB<<"score: "<<score<<endl;
+            if (score > best_score) {
+                best_score = score;
                 best_lyrics = lyrics;
                 best_site = site;
+                best_url = url;
             }
             scale *= DECAY;
         }
@@ -217,7 +223,8 @@ void get_lyrics(const string& song, const string& saveFile, bool print) {
     } else {
         if (print) {
             cout<<endl
-                <<"Showing Lyrics from "<<best_site<<endl
+                <<"Showing Lyrics from "<<best_site<<" ("<<best_url<<")"<<endl
+                <<endl
                 <<best_lyrics<<endl
                 <<endl;
         }
@@ -271,7 +278,7 @@ void play_song(const string& file, bool show_lyrics, bool show_output) {
             cout<<"Could not extract title and artist information from MP3"<<endl;
         } else {
             cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unkown" : artist)<<"\""<<endl;
-            get_lyrics(trim(artist + " " + title), "", true);
+            find_lyrics(trim(artist + " " + title), "", true, false);
         }
     }
 
@@ -321,7 +328,7 @@ int main(int argc, char** argv) {
     songFolder += ends_with(songFolder, "/") ? "" : "/"; 
 
     if (song != "") {
-        get_lyrics(song, saveFile, print);
+        find_lyrics(song, saveFile, print, verbose);
     } else if ((song = args["--download"].asString()) != "") {
         cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<endl
              <<endl;
