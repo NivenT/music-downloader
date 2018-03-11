@@ -68,12 +68,15 @@ The above will search for a song with thriller (respectively, strong) in the tit
 - You can specify `--play` multiple times. Either of the below is acceptable:
   - `./music-downloader --play thriller.mp3 --play manmirror.mp3`
   - `./music-downloader --play thriller.mp3 manmirror.mp3`
-- The program retrieves lyrics from multiple sites and only uses the longest one found
-  - This was added on a whim since I'd sometimes only get a snipped of lyrics so it comes with some annoyances I didn't want to fix immediately
-    - Namely, it prints "Retrieving lyrics from ..." multiple times
-    - Also, you cannot tell which url it ultimately used without checking them all yourself
+- The program retrieves lyrics from multiple sites, scores them, and only keeps the lyrics with the highest score.
+  - The scoring is based off of
+    - order (top search results get a higher default score)
+    - length (avoid sites with incomplete lyrics and favor sites that do things like label the chorus and different verses and whatnot)
+    - similarity between url and song (try to make sure we're getting lyrics from the right song)
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do
 - [ ] Make the program more interactive (menu or REPL like thing most likely)
-- [ ] Add ability to supply Spotify credentials in order for program to download your saved songs (Not sure if I'll ever get around to this)
+- [ ] Add ability to supply Spotify credentials in order for program to download your saved songs
+
+Note: These have been TODOs since practically [day](https://github.com/NivenT/music-downloader/tree/d6dd0f68a7ab92557f1a0d016c0e0823568cd28e) [one](https://github.com/NivenT/music-downloader/tree/e01d9f5c1b7b0570e15377b0eeee980bd74815cc) so don't hold your breath.
