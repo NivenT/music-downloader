@@ -129,7 +129,12 @@ string shellify(const string& cmd) {
     return ret;
 }
 
-int levenshtein(const string& str1, const string& str2) {
+int levenshtein(const string& s1, const string& s2) {
+    string str1(s1.size(), ' '), str2(s2.size(), ' ');
+
+    transform(s1.begin(), s2.end(), str1.begin(), ::tolower);
+    transform(s1.begin(), s2.end(), str1.begin(), ::tolower);
+
     int cost_matrix[str1.size()+1][str2.size()+1];
     for (int i = 0; i <= str1.size(); ++i) {
         cost_matrix[i][0] = i;
