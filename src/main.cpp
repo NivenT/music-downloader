@@ -12,6 +12,8 @@
 
 using namespace std;
 
+// TODO: Split the code here among several files
+
 static const char* USAGE =
 R"({progName}
 
@@ -20,7 +22,7 @@ Usage:
   {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
   {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
-  {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output]
+  {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
 
 Options:
   -h --help             Prints this message.
@@ -256,7 +258,7 @@ bool read_tag(const string& data, string& title, string& artist) {
     return title != "" /* && artist != "" */; // Just title might be enough
 } 
 
-void play_song(const string& file, bool show_lyrics, bool show_output) {
+void play_song(const string& file, bool show_lyrics, bool show_output, bool verbose) {
     cout<<"Playing "<<file<<endl;
 
     if (!ends_with(file, ".mp3")) {
@@ -278,7 +280,7 @@ void play_song(const string& file, bool show_lyrics, bool show_output) {
             cout<<"Could not extract title and artist information from MP3"<<endl;
         } else {
             cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unkown" : artist)<<"\""<<endl;
-            find_lyrics(trim(artist + " " + title), "", true, false);
+            find_lyrics(trim(artist + " " + title), "", true, verbose);
         }
     }
 
@@ -338,7 +340,7 @@ int main(int argc, char** argv) {
 
         for (int i = 0; i < songs.size(); i++) {
             cout<<stars<<endl;
-            play_song(songFolder + songs[i], lyrics, playout);
+            play_song(songFolder + songs[i], lyrics, playout, verbose);
         }
     } else {
         download_songs(apikey, songList, saveFolder, verbose, stats);
