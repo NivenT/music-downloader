@@ -73,6 +73,9 @@ The above will search for a song with thriller (respectively, strong) in the tit
     - order (top search results get a higher default score)
     - length (avoid sites with incomplete lyrics and favor sites that do things like label the chorus and different verses and whatnot)
     - similarity between url and song (try to make sure we're getting lyrics from the right song)
+- When playing music using the `--play` flag, you can
+  - skip a song by pressing `Ctrl+c`
+  - pause a song by pressing `Crtl+z` and later resume by running `%` from your terminal
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do
