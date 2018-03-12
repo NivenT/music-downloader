@@ -101,7 +101,7 @@ string fileify(const string& title) {
 
 string urlify(const string& query) {
     // Maybe I should just convert anything that isn't alphanumeric just to be safe
-    static const unordered_set<char> SPECIAL_CHARS{'&', '/', ',', '$', '!', '?', ':', '=', '[', ']', '+', '(', ')', '\\', '{', '}', '\'', '#'};
+    static const unordered_set<char> SPECIAL_CHARS{'&', '/', ',', '$', '!', '?', ':', '=', '[', ']', '+', '(', ')', '\\', '{', '}', '\'', '#', '.'};
 
     string ret = query;
     for (int i = 0; i < ret.size(); ++i) {
@@ -132,8 +132,8 @@ string shellify(const string& cmd) {
 int levenshtein(const string& s1, const string& s2) {
     string str1(s1.size(), ' '), str2(s2.size(), ' ');
 
-    transform(s1.begin(), s2.end(), str1.begin(), ::tolower);
-    transform(s1.begin(), s2.end(), str1.begin(), ::tolower);
+    transform(s1.begin(), s1.end(), str1.begin(), ::tolower);
+    transform(s2.begin(), s2.end(), str2.begin(), ::tolower);
 
     int cost_matrix[str1.size()+1][str2.size()+1];
     for (int i = 0; i <= str1.size(); ++i) {
