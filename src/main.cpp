@@ -294,7 +294,7 @@ void play_song(const string& file, bool show_lyrics, bool show_output, bool verb
 vector<char*> splitPlayArgs(int argc, char** argv) {
     vector<char*> args;
     for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], "--play") == 0) {
+        while (strcmp(argv[i], "--play") == 0) {
             while (argv[++i] && !starts_with(argv[i], "-")) {
                 args.push_back(((char*)"--play"));
                 args.push_back(argv[i]);
