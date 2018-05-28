@@ -79,3 +79,15 @@ string remove_html_tags(const string& html, const string& rpl) {
     }
     return trim(tagless);
 }
+
+// should actually resolve these to what they're supposed to be instead of just getting rid of them
+// at some point
+string remove_html_entites(string html, const string& rpl) {
+    int pos = 0;
+    while ((pos = html.find('&', pos)) != string::npos) {
+        int end = pos+1;
+        while (isalnum(html[end]) || html[end] == '#') end++;
+        if (html[end] == ';') html.replace(pos, end-pos+1, rpl);
+    }
+    return trim(html);
+}

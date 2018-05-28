@@ -201,6 +201,9 @@ void find_lyrics(const string& song, const string& saveFile, bool print, bool ve
         } else if (starts_with(url, "naijaproper")) {
             // ditto x2
             tie(found, lyrics, site) = get_lyrics(url, "NaijaProper", "<b>Lyrics: ", "Download Lyrics");
+        } else if (starts_with(url, "kamerlyrics")) {
+            tie(found, lyrics, site) = get_lyrics(url, "KamerLyrics", "TOUTES SES PAROLES", "Paroles");
+            lyrics = replace_all(lyrics, "(adsbygoogle = window.adsbygoogle || []).push({});", "");
         } else {
             continue;
         }

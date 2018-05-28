@@ -17,7 +17,7 @@ tuple<bool, string, string> get_lyrics(const string& url, const string& domain, 
                 end = response.text.find(end_tag, end+1);
             }
             string lyrics = remove_html_tags(response.text.substr(start, end-start), rpl);
-            return make_tuple(true, lyrics, domain);
+            return make_tuple(true, remove_html_entites(lyrics, ""), domain);
         }
     }
     return make_tuple(false, "", "");
