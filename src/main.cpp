@@ -198,6 +198,9 @@ void find_lyrics(const string& song, const string& saveFile, bool print, bool ve
             // ditto
             tie(found, lyrics, site) = get_lyrics(url, "SocaLyrics", R"(<div class="entry-content")", "</div>");
             found = found && !starts_with(lyrics, "Bio");
+        } else if (starts_with(url, "naijaproper")) {
+            // ditto x2
+            tie(found, lyrics, site) = get_lyrics(url, "NaijaProper", "<b>Lyrics: ", "Download Lyrics");
         } else {
             continue;
         }
