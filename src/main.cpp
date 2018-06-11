@@ -204,6 +204,9 @@ void find_lyrics(const string& song, const string& saveFile, bool print, bool ve
         } else if (starts_with(url, "kamerlyrics")) {
             tie(found, lyrics, site) = get_lyrics(url, "KamerLyrics", "TOUTES SES PAROLES", "Paroles");
             lyrics = replace_all(lyrics, "(adsbygoogle = window.adsbygoogle || []).push({});", "");
+        } else if (starts_with(url, "musixmatch")) {
+            tie(found, lyrics, site) = get_lyrics(url, "MusixMatch", R"(<p class="mxm-lyrics__content)",
+                                                  "</p>");
         } else {
             continue;
         }
