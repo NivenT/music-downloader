@@ -207,6 +207,9 @@ void find_lyrics(const string& song, const string& saveFile, bool print, bool ve
         } else if (starts_with(url, "musixmatch")) {
             tie(found, lyrics, site) = get_lyrics(url, "MusixMatch", R"(<p class="mxm-lyrics__content)",
                                                   "</p>");
+        } else if (starts_with(url, "greatsong")) {
+            tie(found, lyrics, site) = get_lyrics(url, "GreatSong", R"(<div class="share-lyrics")",
+                                                  "</div>", "\n");
         } else {
             continue;
         }
