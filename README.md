@@ -48,7 +48,7 @@ Examples include
 * `./music-downloader` This will download all the songs in songs.txt and save them in a folder named songs
 * `./music-downloader --lyrics "Thriller"` This will search for the song Thriller and print its lyrics
 * `./music-downloader --dest music -v` This will download all the songs in songs.txt and save them in a folder named music. It will also print verbose output.
-* `./music-downloader --download "Thriller"` This will download Thriller and save is in a folder names songs.
+* `./music-downloader --download "canon in d"` This will download Canon in D and save is in a folder names songs.
 * `./music-downloader --play songs/thriller.mp3 --show-lyrics` This will play Thriller from a local MP3 file, as well as search for and print its lyrics to the terminal.
 
 ## Advanced Examples

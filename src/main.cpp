@@ -210,6 +210,7 @@ void find_lyrics(const string& song, const string& saveFile, bool print, bool ve
         } else if (starts_with(url, "greatsong")) {
             tie(found, lyrics, site) = get_lyrics(url, "GreatSong", R"(<div class="share-lyrics")",
                                                   "</div>", "\n");
+            found = false;
         } else {
             continue;
         }
@@ -291,7 +292,7 @@ void play_song(const string& file, bool show_lyrics, bool show_output, bool verb
         } else if (!read_tag(data, title, artist)) {
             cout<<"Could not extract title and artist information from MP3"<<endl;
         } else {
-            cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unkown" : artist)<<"\""<<endl;
+            cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unknown" : artist)<<"\""<<endl;
             find_lyrics(trim(artist + " " + title), "", true, verbose);
         }
     }
