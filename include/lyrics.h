@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 
 extern std::tuple<bool, std::string, std::string> get_lyrics(const std::string& url, const std::string& domain,
@@ -5,3 +6,4 @@ extern std::tuple<bool, std::string, std::string> get_lyrics(const std::string& 
                                                              const std::string& end_tag, 
 												             const std::string& rpl = "", 
                                                              bool ugly_while_loop = false);
+extern void find_lyrics(const std::string&, const std::string&, bool, bool);

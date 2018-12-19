@@ -31,6 +31,12 @@ endif()
 
 add_subdirectory(opt)
 
-add_executable(music-downloader src/main.cpp src/util.cpp src/youtube.cpp src/web.cpp src/lyrics.cpp)
+add_executable(music-downloader src/main.cpp 
+                                src/util.cpp 
+                                src/youtube.cpp 
+                                src/web.cpp 
+                                src/lyrics.cpp
+                                src/play.cpp
+                                src/download_song.cpp)
 target_link_libraries(music-downloader ${CPR_LIBRARIES} docopt)
 include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS} ${DOCOPT_INCLUDE_DIRS} include)
