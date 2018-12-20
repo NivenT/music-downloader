@@ -28,7 +28,7 @@ Usage:
   ./music-downloader --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
   ./music-downloader --download SONG [--dest FOLDER] [-v | --verbose]
   ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
-  ./music-downloader --play-song SONG [--keep] [--show-lyrics] [-v | --verbose]
+  ./music-downloader --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
   -h --help             Prints this message.
@@ -43,8 +43,9 @@ Options:
   --dir FOLDER          The folder containing the files to play [default: .]
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
-  --play-song SONG      Song to search for online and then play if found
+  --play-song SONGS...  Song to search for online and then play if found
   --keep                Keep a saved .mp3 of the song
+
 ```
 Examples include
 
@@ -72,6 +73,7 @@ The above will search for a song with thriller (respectively, strong) in the tit
 - You can specify `--play` multiple times. Either of the below is acceptable:
   - `./music-downloader --play thriller.mp3 --play manmirror.mp3`
   - `./music-downloader --play thriller.mp3 manmirror.mp3`
+- `--play-song` can also be given multiple songs in the same way.
 - The program retrieves lyrics from multiple sites, scores them, and only keeps the lyrics with the highest score.
   - The scoring is based off of
     - order (top search results get a higher default score)
