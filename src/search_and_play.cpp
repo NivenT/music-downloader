@@ -14,7 +14,8 @@ void search_and_play(const string& song, bool keep, bool show_lyrics, bool verbo
     string fileTitle = keep ? fileify(song) : gen_tmp_file_title();
 
     download_song_from_youtube(song, fileTitle, verbose, stats);
-    if (!stats["successfully downloaded"].empty()) {
+    if (!stats[DOWNLOAD_MISTAKE_MSG].empty() || !stats[DOWNLOAD_SUCC_MSG].empty()
+        || !stats[ALREADY_EXISTED_MSG].empty()) {
         if (show_lyrics) {
             find_lyrics(trim(song), "", true, verbose);
         }

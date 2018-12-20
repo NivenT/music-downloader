@@ -24,16 +24,16 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
     if (songId == "") {
         cout<<"\""<<song<<"\" could not be found"<<endl;
 
-        stats["not found"].insert(song);
+        stats[NOT_FOUND_MSG].insert(song);
     } else if (song_exists(fileTitle)) {
         cout<<"\""<<song<<"\" has already been downloaded"<<endl;
 
-        stats["already existed"].insert(song);
+        stats[ALREADY_EXISTED_MSG].insert(song);
     } else if ((match = song_probably_exists(fileTitle, folder)) != "") {
         cout<<"\""<<song<<"\" has likely already been downloaded"<<endl
             <<"\""<<match<<"\" was found which is a close match"<<endl;
 
-        stats["probably already existed, and so were not downloaded"].insert(song + " -> " + match);
+        stats[MAYBE_ALREADY_EXISTED_MSG].insert(song + " -> " + match);
     } else {
         if (verbose) {
             cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<endl;
@@ -44,7 +44,7 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
             cout<<"Could not find song"<<endl
                 <<endl;
 
-            stats["not found"].insert(song);
+            stats[NOT_FOUND_MSG].insert(song);
             return;
         } else if (verbose) {
             cout<<TAB<<"Donwload url: "<<downloadUrl<<endl;
@@ -57,21 +57,21 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
             write_to_mp3(fileTitle, songData, verbose);
 
             if (title_distance(song, songTitle) >= SIMILARITY_THRESHOLD) {
-                stats["downloaded, but were likely not the songs you wanted"].insert(song + " -> " + songTitle);
+                stats[DOWNLOAD_MISTAKE_MSG].insert(song + " -> " + songTitle);
             } else {
-                stats["successfully downloaded"].insert(song);
+                stats[DOWNLOAD_SUCC_MSG].insert(song);
             }
         } else {
             cout<<"Failed to download "<<songTitle<<endl;
 
-            stats["could not be downloaded"].insert(song);
+            stats[DOWNLOAD_FAIL_MSG].insert(song);
         }
     }
 }
 
 void download_song(const string& song, const string& saveFolder, 
                     bool verbose, map<string, set<string>>& stats) {
-    download_song_from_youtube(song, saveFolder + "/", verbose, stats);
+    download_song_from_youtube(song, saveFolder, verbose, stats);
 }
 
 void download_songs(const string& songList, const string& saveFolder, 

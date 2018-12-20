@@ -20,7 +20,7 @@ Usage:
   {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
   {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
-  {progName} --play-song SONG [--keep] [--show-lyrics] [-v | --verbose]
+  {progName} --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
   -h --help             Prints this message.
@@ -35,27 +35,33 @@ Options:
   --dir FOLDER          The folder containing the files to play [default: .]
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
-  --play-song SONG      Song to search for online and then play if found
+  --play-song SONGS...  Song to search for online and then play if found
   --keep                Keep a saved .mp3 of the song
 )";
 
 // TODO: Restructure this in a slightly cleaner way
-vector<char*> splitPlayArgs(int argc, char** argv) {
-    vector<char*> args;
+vector<const char*> splitArgs(int argc, const char** argv, const char* type) {
+    vector<const char*> args;
     for (int i = 0; i < argc; i++) {
-        while (strcmp(argv[i], "--play") == 0) {
+        while (strcmp(argv[i], type) == 0) {
             while (argv[++i] && !starts_with(argv[i], "-")) {
-                args.push_back(((char*)"--play"));
+                args.push_back(type);
                 args.push_back(argv[i]);
             }
+            if (i >= argc) break;
         }
         if (i < argc) args.push_back(argv[i]);
     }
     return args;
 }
 
-int main(int argc, char** argv) {
-    auto vargv = splitPlayArgs(argc, argv);
+int main(int argc, const char** argv) {
+    static const string stars(100, '*');
+    srand(time(nullptr));
+
+    auto vargv = splitArgs(argc, argv, "--play");
+    vargv = splitArgs(vargv.size(), &vargv[0], "--play-song");
+
     map<string, docopt::value> args =
         docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
                        {vargv.data()+1, vargv.data() + vargv.size()});
@@ -64,8 +70,7 @@ int main(int argc, char** argv) {
            saveFolder = args["--dest"].asString(),
            song = args["--lyrics"].asString(),
            saveFile = args["--save"].asString(),
-           songFolder = args["--dir"].asString(),
-           song2 = args["--play-song"].asString();
+           songFolder = args["--dir"].asString();
 
     bool print = !args["--hide"].asBool(),
          verbose = args["--verbose"].asBool(),
@@ -86,14 +91,15 @@ int main(int argc, char** argv) {
              <<endl;
         download_song(song, saveFolder, verbose, stats);
     } else if (!songs.empty()) {
-        static const string stars(100, '*');
-
         for (int i = 0; i < songs.size(); i++) {
             cout<<stars<<endl;
             play_song(songFolder + songs[i], lyrics, playout, verbose);
         }
-    } else if (!song2.empty()) {
-        search_and_play(song2, keep, lyrics, verbose);
+    } else if (!(songs = args["--play-song"].asStringList()).empty()) {
+        for (int i = 0; i < songs.size(); i++) {
+          cout<<stars<<endl;
+          search_and_play(songs[i], keep, lyrics, verbose);
+        }
     } else {
         download_songs(songList, saveFolder, verbose, stats);
         print_statistics(stats);
