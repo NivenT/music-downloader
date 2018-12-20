@@ -11,6 +11,7 @@
 
 using namespace std;
 
+// TODO: Give --play-song a better name
 static const char* USAGE =
 R"({progName}
 
