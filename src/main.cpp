@@ -7,6 +7,7 @@
 #include "download_song.h"
 #include "lyrics.h"
 #include "play.h"
+#include "search_and_play.h"
 
 using namespace std;
 
@@ -19,6 +20,7 @@ Usage:
   {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
   {progName} --download SONG [--dest FOLDER] [-v | --verbose]
   {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
+  {progName} --play-song SONG [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
   -h --help             Prints this message.
@@ -33,6 +35,8 @@ Options:
   --dir FOLDER          The folder containing the files to play [default: .]
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
+  --play-song SONG      Song to search for online and then play if found
+  --keep                Keep a saved .mp3 of the song
 )";
 
 // TODO: Restructure this in a slightly cleaner way
@@ -56,17 +60,18 @@ int main(int argc, char** argv) {
         docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
                        {vargv.data()+1, vargv.data() + vargv.size()});
 
-    string apikey = "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc", 
-           songList = args["--songs"].asString(), 
+    string songList = args["--songs"].asString(), 
            saveFolder = args["--dest"].asString(),
            song = args["--lyrics"].asString(),
            saveFile = args["--save"].asString(),
-           songFolder = args["--dir"].asString();
+           songFolder = args["--dir"].asString(),
+           song2 = args["--play-song"].asString();
 
     bool print = !args["--hide"].asBool(),
          verbose = args["--verbose"].asBool(),
          lyrics = args["--show-lyrics"].asBool(),
-         playout = args["--show-play-output"].asBool();
+         playout = args["--show-play-output"].asBool(),
+         keep = args["--keep"].asBool();
 
     vector<string> songs = args["--play"].asStringList();
 
@@ -79,7 +84,7 @@ int main(int argc, char** argv) {
     } else if ((song = args["--download"].asString()) != "") {
         cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<endl
              <<endl;
-        download_song(apikey, song, saveFolder, verbose, stats);
+        download_song(song, saveFolder, verbose, stats);
     } else if (!songs.empty()) {
         static const string stars(100, '*');
 
@@ -87,8 +92,10 @@ int main(int argc, char** argv) {
             cout<<stars<<endl;
             play_song(songFolder + songs[i], lyrics, playout, verbose);
         }
+    } else if (!song2.empty()) {
+        search_and_play(song2, keep, lyrics, verbose);
     } else {
-        download_songs(apikey, songList, saveFolder, verbose, stats);
+        download_songs(songList, saveFolder, verbose, stats);
         print_statistics(stats);
     }
     return 0;

@@ -6,20 +6,21 @@
 #include "web.h"
 #include "download_song.h"
 
-#define ILLEGAL_CHARCTERS {".", "|", ":", "\"", "'", "(", ")", "&", "[", "]"}
-
 using namespace std;
 
-void download_song(const string& apikey, const string& song, const string& saveFolder, 
-                    bool verbose, map<string, set<string>>& stats) {
+void download_song_from_youtube(const string& song, const string& file_pattern, 
+                                bool verbose, map<string, set<string>>& stats) {
     static const float SIMILARITY_THRESHOLD = 0.63;
 
     string songId, songTitle;
-    tie(songId, songTitle) = search_youtube_for_song(song, apikey, verbose);
+    tie(songId, songTitle) = search_youtube_for_song(song, verbose);
 
-    string fileTitle = saveFolder + replace_all(songTitle, {{"/", "\\"}, ILLEGAL_CHARCTERS}, {"_", ""});
+    string folder, file;
+    tie(folder, file) = split_path(file_pattern);
+    folder = folder == "" ? "./" : folder;
+    string fileTitle = folder + (file == "" ? fileify(songTitle) : file);
+
     string match;
-
     if (songId == "") {
         cout<<"\""<<song<<"\" could not be found"<<endl;
 
@@ -28,7 +29,7 @@ void download_song(const string& apikey, const string& song, const string& saveF
         cout<<"\""<<song<<"\" has already been downloaded"<<endl;
 
         stats["already existed"].insert(song);
-    } else if ((match = song_probably_exists(fileTitle, saveFolder)) != "") {
+    } else if ((match = song_probably_exists(fileTitle, folder)) != "") {
         cout<<"\""<<song<<"\" has likely already been downloaded"<<endl
             <<"\""<<match<<"\" was found which is a close match"<<endl;
 
@@ -68,7 +69,12 @@ void download_song(const string& apikey, const string& song, const string& saveF
     }
 }
 
-void download_songs(const string& apikey, const string& songList, const string& saveFolder, 
+void download_song(const string& song, const string& saveFolder, 
+                    bool verbose, map<string, set<string>>& stats) {
+    download_song_from_youtube(song, saveFolder + "/", verbose, stats);
+}
+
+void download_songs(const string& songList, const string& saveFolder, 
                     bool verbose, map<string, set<string>>& stats) {
     cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<endl
              <<endl;
@@ -81,7 +87,7 @@ void download_songs(const string& apikey, const string& songList, const string& 
             // just to make sure statistics print in alphabetical order
             transform(song.begin(), song.end(), song.begin(), ::tolower);
 
-            download_song(apikey, song, saveFolder, verbose, stats);
+            download_song(song, saveFolder, verbose, stats);
             cout<<endl;
         }
     }

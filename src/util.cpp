@@ -11,10 +11,12 @@
 
 #include "util.h"
 
+#define ILLEGAL_CHARCTERS {".", "|", ":", "\"", "'", "(", ")", "&", "[", "]"}
+
 using namespace std;
 
 bool song_exists(const string& title) {
-    string path = fileify(title);
+    string path = title;
     ifstream file(path.c_str());
     return file.good();
 }
@@ -92,11 +94,8 @@ string to_hex(unsigned char c) {
 }
 
 string fileify(const string& title) {
-    string ret = title;
-    transform(title.begin(), title.end(), ret.begin(), [](char c) {
-        return c == ' ' ? '_' : c;
-    });
-    return ends_with(ret, ".mp3") ? ret : ret + ".mp3";
+    string ret = ends_with(title, ".mp3") ? title.substr(title.size()-4) : title;
+    return replace_all(ret, {{"/", "\\", " "}, ILLEGAL_CHARCTERS}, {"_", ""}) + ".mp3";
 }
 
 string urlify(const string& query) {
@@ -127,6 +126,15 @@ string shellify(const string& cmd) {
         }
     }
     return ret;
+}
+
+string gen_tmp_file_title() {
+    return "TMP" + to_string(rand()) + ".mp3";
+}
+
+tuple<string, string> split_path(const string& path) {
+    int pos = path.rfind("/");
+    return pos == string::npos ? make_tuple("", path) : make_tuple(path.substr(0, pos+1), path.substr(pos+1));
 }
 
 int levenshtein(const string& s1, const string& s2) {
@@ -195,7 +203,7 @@ float title_distance(const string& str1, const string& str2) {
 }
 
 void write_to_mp3(const string& title, const string& data, bool verbose) {
-    string path = fileify(title);
+    string path = title;
 
     if (verbose) {
         cout<<TAB<<"Saving song to "<<path<<endl;

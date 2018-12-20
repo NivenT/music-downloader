@@ -4,6 +4,8 @@
 #include "web.h"
 #include "youtube.h"
 
+#define APIKEY "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc"
+
 using json = nlohmann::json;
 using namespace std;
 
@@ -29,7 +31,7 @@ string youtube_to_download(const string& id) {
 }
 
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
-tuple<string, string> search_youtube_for_song(const string& song, const string& apikey, bool verbose) {
+tuple<string, string> search_youtube_for_song(const string& song, bool verbose) {
     // Top result isn't guaranteed to be the correct result
     static const int MAX_NUM_RESULTS_PER_SONG = 3;
 
@@ -39,7 +41,7 @@ tuple<string, string> search_youtube_for_song(const string& song, const string& 
     request["maxResults"] = to_string(MAX_NUM_RESULTS_PER_SONG);
     request["type"] = "video";
     request["q"] = urlify(song);
-    request["key"] = apikey;
+    request["key"] = APIKEY;
 
     cout<<"Searching YouTube for song: \""<<song<<"\""<<endl;
     if (verbose) {
