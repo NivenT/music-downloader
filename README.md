@@ -25,9 +25,10 @@ Run the program from terminal. The usage is as follows:
 Usage:
   ./music-downloader (-h | --help)
   ./music-downloader [--songs FILE] [--dest FOLDER] [-v | --verbose]
-  ./music-downloader --lyrics SONG [--save FILE] [--hide]
+  ./music-downloader --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
   ./music-downloader --download SONG [--dest FOLDER] [-v | --verbose]
-  ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output]
+  ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
+  ./music-downloader --play-song SONG [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
   -h --help             Prints this message.
@@ -42,6 +43,8 @@ Options:
   --dir FOLDER          The folder containing the files to play [default: .]
   --show-lyrics         Prints lyrics of song to the screen
   --show-play-output    Does not use quiet flag when running play command
+  --play-song SONG      Song to search for online and then play if found
+  --keep                Keep a saved .mp3 of the song
 ```
 Examples include
 
@@ -50,6 +53,7 @@ Examples include
 * `./music-downloader --dest music -v` This will download all the songs in songs.txt and save them in a folder named music. It will also print verbose output.
 * `./music-downloader --download "canon in d"` This will download Canon in D and save is in a folder names songs.
 * `./music-downloader --play songs/thriller.mp3 --show-lyrics` This will play Thriller from a local MP3 file, as well as search for and print its lyrics to the terminal.
+* `./music-downloader --play-song "familia nicki" --show-lyrics` This will download Familia and then immediately start playing it (it will also search for and print its lyrics). The downloaded song is deleted whenever it finishes playing (use `--keep` if you want to keep the mp3).
 
 ## Advanced Examples
 
