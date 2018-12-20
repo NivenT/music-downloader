@@ -23,29 +23,28 @@ Run the program from terminal. The usage is as follows:
 ./music-downloader
 
 Usage:
-  ./music-downloader (-h | --help)
-  ./music-downloader [--songs FILE] [--dest FOLDER] [-v | --verbose]
-  ./music-downloader --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
-  ./music-downloader --download SONG [--dest FOLDER] [-v | --verbose]
-  ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
-  ./music-downloader --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
+    ./music-downloader (-h | --help)
+    ./music-downloader [--songs FILE] [--dest FOLDER] [-v | --verbose]
+    ./music-downloader --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
+    ./music-downloader --download SONGS... [--dest FOLDER] [-v | --verbose]
+    ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
+    ./music-downloader --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
-  -h --help             Prints this message.
-  --songs FILE          Text file containing songs to download [default: songs.txt]
-  --dest FOLDER         Destination folder (where downloaded songs are saved) [default: songs/]
-  -v --verbose          Use verbose output
-  --lyrics SONG         Name of song to find the lyrics of [default: ]
-  --save FILE           File to save the lyrics to [default: ]
-  --hide                Doesn't print the lyrics to the terminal
-  --download SONG       Downloads a single song [default: ]
-  --play FILES...       List of MP3 files to play
-  --dir FOLDER          The folder containing the files to play [default: .]
-  --show-lyrics         Prints lyrics of song to the screen
-  --show-play-output    Does not use quiet flag when running play command
-  --play-song SONGS...  Song to search for online and then play if found
-  --keep                Keep a saved .mp3 of the song
-
+    -h --help             Prints this message.
+    --songs FILE          Text file containing songs to download [default: songs.txt]
+    --dest FOLDER         Destination folder (where downloaded songs are saved) [default: songs/]
+    -v --verbose          Use verbose output
+    --lyrics SONG         Name of song to find the lyrics of [default: ]
+    --save FILE           File to save the lyrics to [default: ]
+    --hide                Doesn't print the lyrics to the terminal
+    --download SONGS...   List of songs to download
+    --play FILES...       List of MP3 files to play
+    --dir FOLDER          The folder containing the files to play [default: .]
+    --show-lyrics         Prints lyrics of song to the screen
+    --show-play-output    Does not use quiet flag when running play command
+    --play-song SONGS...  Song to search for online and then play if found
+    --keep                Keep a saved .mp3 of the song
 ```
 Examples include
 
@@ -73,7 +72,7 @@ The above will search for a song with thriller (respectively, strong) in the tit
 - You can specify `--play` multiple times. Either of the below is acceptable:
   - `./music-downloader --play thriller.mp3 --play manmirror.mp3`
   - `./music-downloader --play thriller.mp3 manmirror.mp3`
-- `--play-song` can also be given multiple songs in the same way.
+- `--play-song` and `--download` can also be given multiple songs in the same way.
 - The program retrieves lyrics from multiple sites, scores them, and only keeps the lyrics with the highest score.
   - The scoring is based off of
     - order (top search results get a higher default score)

@@ -16,28 +16,28 @@ static const char* USAGE =
 R"({progName}
 
 Usage:
-  {progName} (-h | --help)
-  {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
-  {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
-  {progName} --download SONG [--dest FOLDER] [-v | --verbose]
-  {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
-  {progName} --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
+    {progName} (-h | --help)
+    {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
+    {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
+    {progName} --download SONGS... [--dest FOLDER] [-v | --verbose]
+    {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
+    {progName} --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
-  -h --help             Prints this message.
-  --songs FILE          Text file containing songs to download [default: songs.txt]
-  --dest FOLDER         Destination folder (where downloaded songs are saved) [default: songs/]
-  -v --verbose          Use verbose output
-  --lyrics SONG         Name of song to find the lyrics of [default: ]
-  --save FILE           File to save the lyrics to [default: ]
-  --hide                Doesn't print the lyrics to the terminal
-  --download SONG       Downloads a single song [default: ]
-  --play FILES...       List of MP3 files to play
-  --dir FOLDER          The folder containing the files to play [default: .]
-  --show-lyrics         Prints lyrics of song to the screen
-  --show-play-output    Does not use quiet flag when running play command
-  --play-song SONGS...  Song to search for online and then play if found
-  --keep                Keep a saved .mp3 of the song
+    -h --help             Prints this message.
+    --songs FILE          Text file containing songs to download [default: songs.txt]
+    --dest FOLDER         Destination folder (where downloaded songs are saved) [default: songs/]
+    -v --verbose          Use verbose output
+    --lyrics SONG         Name of song to find the lyrics of [default: ]
+    --save FILE           File to save the lyrics to [default: ]
+    --hide                Doesn't print the lyrics to the terminal
+    --download SONGS...   List of songs to download
+    --play FILES...       List of MP3 files to play
+    --dir FOLDER          The folder containing the files to play [default: .]
+    --show-lyrics         Prints lyrics of song to the screen
+    --show-play-output    Does not use quiet flag when running play command
+    --play-song SONGS...  Song to search for online and then play if found
+    --keep                Keep a saved .mp3 of the song
 )";
 
 // TODO: Restructure this in a slightly cleaner way
@@ -62,10 +62,11 @@ int main(int argc, const char** argv) {
 
     auto vargv = splitArgs(argc, argv, "--play");
     vargv = splitArgs(vargv.size(), &vargv[0], "--play-song");
+    vargv = splitArgs(vargv.size(), &vargv[0], "--download");
 
     map<string, docopt::value> args =
         docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
-                       {vargv.data()+1, vargv.data() + vargv.size()});
+                                   {vargv.data()+1, vargv.data() + vargv.size()});
 
     string songList = args["--songs"].asString(), 
            saveFolder = args["--dest"].asString(),
@@ -79,7 +80,7 @@ int main(int argc, const char** argv) {
          playout = args["--show-play-output"].asBool(),
          keep = args["--keep"].asBool();
 
-    vector<string> songs = args["--play"].asStringList();
+    vector<string> songs = args["--download"].asStringList();
 
     map<string, set<string>> stats;
     saveFolder += ends_with(saveFolder, "/") ? "" : "/";
@@ -87,19 +88,22 @@ int main(int argc, const char** argv) {
 
     if (song != "") {
         find_lyrics(song, saveFile, print, verbose);
-    } else if ((song = args["--download"].asString()) != "") {
-        cout<<"Downloading \""<<song<<"\" and saving song in \""<<saveFolder<<"\""<<endl
-             <<endl;
-        download_song(song, saveFolder, verbose, stats);
     } else if (!songs.empty()) {
+        for (int i = 0; i < songs.size(); i++) {
+            cout<<stars<<endl;
+            cout<<"Downloading \""<<songs[i]<<"\" and saving song in \""<<saveFolder<<"\""<<endl
+                <<endl;
+            download_song(songs[i], saveFolder, verbose, stats);
+        }
+    } else if (!(songs = args["--play"].asStringList()).empty()) {
         for (int i = 0; i < songs.size(); i++) {
             cout<<stars<<endl;
             play_song(songFolder + songs[i], lyrics, playout, verbose);
         }
     } else if (!(songs = args["--play-song"].asStringList()).empty()) {
         for (int i = 0; i < songs.size(); i++) {
-          cout<<stars<<endl;
-          search_and_play(songs[i], keep, lyrics, verbose);
+            cout<<stars<<endl;
+            search_and_play(songs[i], keep, lyrics, verbose);
         }
     } else {
         download_songs(songList, saveFolder, verbose, stats);
