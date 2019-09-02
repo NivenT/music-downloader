@@ -5,8 +5,13 @@
 #include "youtube.h"
 #include "web.h"
 #include "download_song.h"
+#include "ytconverter.h"
 
 using namespace std;
+
+// Gotta love globals
+// I think writing C code recently has made me much more accepting of globals
+std::vector<YTConverter*> converters;
 
 void download_song_from_youtube(const string& song, const string& file_pattern, 
                                 bool verbose, map<string, set<string>>& stats) {
@@ -36,36 +41,44 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
         stats[MAYBE_ALREADY_EXISTED_MSG].insert(song + " -> " + match);
     } else {
         if (verbose) {
-            cout<<TAB<<"Downloading video with Id "<<songId<<"..."<<endl;
+            cout<<"Downloading video with Id "<<songId<<"..."<<endl;
         }
 
-        const string downloadUrl = youtube_to_download(songId);
-        if (downloadUrl == "") {
-            cout<<"Could not find song"<<endl
-                <<endl;
+        for (auto& converter : converters) {
+            cout<<TAB<<"Attempting to use "<<converter->get_name()<<" to download video..."<<endl;
+            const string downloadUrl = converter->get_link(songId);
+            if (downloadUrl == "") {
+                cout<<TAB<<"Could not find song"<<endl
+                    <<endl;
+                continue;
 
-            stats[NOT_FOUND_MSG].insert(song);
-            return;
-        } else if (verbose) {
-            cout<<TAB<<"Donwload url: "<<downloadUrl<<endl;
-        }
-
-        string songData; bool succ;
-        tie(succ, songData) = download_song(downloadUrl);
-        if (succ) {
-            cout<<"Successfully downloaded "<<songTitle<<endl;
-            write_to_mp3(fileTitle, songData, verbose);
-
-            if (title_distance(song, songTitle) >= SIMILARITY_THRESHOLD) {
-                stats[DOWNLOAD_MISTAKE_MSG].insert(song + " -> " + songTitle);
-            } else {
-                stats[DOWNLOAD_SUCC_MSG].insert(song);
+                // TODO: Properly collect stats
+                stats[NOT_FOUND_MSG].insert(song);
+                return;
+            } else if (verbose) {
+                cout<<TAB<<TAB<<"Donwload url: "<<downloadUrl<<endl;
             }
-        } else {
-            cout<<"Failed to download "<<songTitle<<endl;
 
-            stats[DOWNLOAD_FAIL_MSG].insert(song);
-        }
+            string songData; bool succ;
+            tie(succ, songData) = converter->download_song(downloadUrl);
+            if (succ) {
+                cout<<TAB<<"Successfully downloaded "<<songTitle<<endl;
+                write_to_mp3(fileTitle, songData, verbose);
+
+                if (title_distance(song, songTitle) >= SIMILARITY_THRESHOLD) {
+                    stats[DOWNLOAD_MISTAKE_MSG].insert(song + " -> " + songTitle);
+                } else {
+                    stats[DOWNLOAD_SUCC_MSG].insert(song);
+                }
+                break;
+            } else {
+                cout<<TAB<<"Failed to download "<<songTitle<<endl;
+                continue;
+
+                // TODO: Properly collect stats
+                stats[DOWNLOAD_FAIL_MSG].insert(song);
+            }
+        }   
     }
 }
 

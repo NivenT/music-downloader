@@ -9,27 +9,6 @@
 using json = nlohmann::json;
 using namespace std;
 
-// TODO: Handle HTTP response code 3XX (i.e. redirect)
-string youtube_to_download(const string& id) {
-    json request;
-    request["video"] = "http://www.youtube.com/watch?v=" + id;
-    request["autostart"] = "1";
-
-    string query = construct_query(request, {"video", "autostart"});
-    string url = "http://www.convertmp3.io/download/?" + query;
-
-    auto response = cpr::Get(cpr::Url{url});
-    if (check_successful_response(response, "YouTubeInMP3")) {
-        auto links = match_regex(response.text, "href=\"([^\"]*)\"", -1, 1);
-        for (const auto& link : links) {
-            if (starts_with(link, "/download")) {
-                return "http://www.convertmp3.io" + link;
-            }
-        }
-    }
-    return "";
-}
-
 // YouTube API https://developers.google.com/youtube/v3/docs/search/list
 tuple<string, string> search_youtube_for_song(const string& song, bool verbose) {
     // Top result isn't guaranteed to be the correct result

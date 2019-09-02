@@ -8,8 +8,11 @@
 #include "lyrics.h"
 #include "play.h"
 #include "search_and_play.h"
+#include "ytconverter.h"
 
 using namespace std;
+
+extern std::vector<YTConverter*> converters;
 
 // TODO: Give --play-song a better name
 static const char* USAGE =
@@ -84,7 +87,9 @@ int main(int argc, const char** argv) {
 
     map<string, set<string>> stats;
     saveFolder += ends_with(saveFolder, "/") ? "" : "/";
-    songFolder += ends_with(songFolder, "/") ? "" : "/"; 
+    songFolder += ends_with(songFolder, "/") ? "" : "/";
+
+    converters.push_back(new ConvertMP3);
 
     if (song != "") {
         find_lyrics(song, saveFile, print, verbose);
@@ -108,6 +113,10 @@ int main(int argc, const char** argv) {
     } else {
         download_songs(songList, saveFolder, verbose, stats);
         print_statistics(stats);
+    }
+
+    for (auto& converter : converters) {
+        delete converter;
     }
     return 0;
 }

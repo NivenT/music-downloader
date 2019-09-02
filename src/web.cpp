@@ -42,22 +42,6 @@ string construct_query(const json& request, const vector<string>& keys) {
     return query;
 }
 
-tuple<bool, string> download_song(const string& url) {
-    static const int MAX_NUM_ATTEMPTS = 100;
-
-    static const auto doAgain = [](const string& mp3) {
-        // Magic number is hopefully not so magic
-        return starts_with(trim(mp3), "<html>") || mp3.size() < 100*1024;
-    };
-
-    auto response = cpr::Get(cpr::Url{url}); bool fail;
-    for (int i = 0; (fail = doAgain(response.text)) && check_successful_response(response, "YouTubeInMP3") && i < MAX_NUM_ATTEMPTS; ++i) {
-        response = cpr::Get(cpr::Url{url});
-    }
-    // check_successful_response here may not be needed
-    return make_tuple(!fail && check_successful_response(response, "YouTubeInMP3"), response.text);
-}
-
 string search_duckduckgo(const string& query) {
     string url = "https://duckduckgo.com/html/?q=" + urlify(query);
 
