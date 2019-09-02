@@ -38,6 +38,7 @@ add_executable(music-downloader src/main.cpp
                                 src/lyrics.cpp
                                 src/play.cpp
                                 src/download_song.cpp
-                                src/search_and_play.cpp)
+                                src/search_and_play.cpp
+                                src/ytconverter.cpp)
 target_link_libraries(music-downloader ${CPR_LIBRARIES} docopt)
 include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS} ${DOCOPT_INCLUDE_DIRS} include)
