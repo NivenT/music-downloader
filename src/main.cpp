@@ -89,6 +89,7 @@ int main(int argc, const char** argv) {
     saveFolder += ends_with(saveFolder, "/") ? "" : "/";
     songFolder += ends_with(songFolder, "/") ? "" : "/";
 
+    converters.push_back(new PointMP3);
     converters.push_back(new ConvertMP3);
 
     if (song != "") {

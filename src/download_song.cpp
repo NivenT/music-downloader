@@ -60,7 +60,7 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
             }
 
             string songData; bool succ;
-            tie(succ, songData) = converter->download_song(downloadUrl);
+            tie(succ, songData) = converter->download_song(downloadUrl, verbose);
             if (succ) {
                 cout<<TAB<<"Successfully downloaded "<<songTitle<<endl;
                 write_to_mp3(fileTitle, songData, verbose);
@@ -72,7 +72,7 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
                 }
                 break;
             } else {
-                cout<<TAB<<"Failed to download "<<songTitle<<endl;
+                cout<<TAB<<converter->get_name()<<" failed to download "<<songTitle<<endl;
                 continue;
 
                 // TODO: Properly collect stats

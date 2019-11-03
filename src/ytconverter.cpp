@@ -7,6 +7,21 @@
 using json = nlohmann::json;
 using namespace std;
 
+static bool doAgain(const string& mp3) {
+    // Magic number is hopefully not so magic
+    return starts_with(trim(mp3), "<html>") || mp3.size() < 100*1024;
+};
+
+tuple<bool, string> YTConverter::download_song(const string& url, bool verbose) {
+    auto response = cpr::Get(cpr::Url{url}); bool fail;
+    for (int i = 0; (fail = doAgain(response.text)) && check_successful_response(response) && i < MAX_NUM_ATTEMPTS; ++i) {
+        if (verbose && i%10 == 9) cout<<TAB<<TAB<<TAB<<"Attempt "<<(i+1)<<" / "<<MAX_NUM_ATTEMPTS<<"..."<<endl;
+        response = cpr::Get(cpr::Url{url});
+    }
+    // check_successful_response here may not be needed
+    return make_tuple(!fail && check_successful_response(response), response.text);
+}
+
 string ConvertMP3::get_link(const string& id) {
     json request;
     request["video"] = "http://www.youtube.com/watch?v=" + id;
@@ -16,7 +31,7 @@ string ConvertMP3::get_link(const string& id) {
     string url = "http://www.convertmp3.io/download/?" + query;
 
     auto response = cpr::Get(cpr::Url{url});
-    if (check_successful_response(response, "YouTubeInMP3")) {
+    if (check_successful_response(response)) {
         auto links = match_regex(response.text, "href=\"([^\"]*)\"", -1, 1);
         for (const auto& link : links) {
             if (starts_with(link, "/download")) {
@@ -27,18 +42,21 @@ string ConvertMP3::get_link(const string& id) {
     return "";
 }
 
-tuple<bool, string> ConvertMP3::download_song(const string& url) {
-    static const int MAX_NUM_ATTEMPTS = 100;
+string PointMP3::get_link(const string& id) {
+    json request;
+    request["req"] = "http://www.youtube.com/watch?v=" + id;
+    request["format"] = "mp3";
 
-    static const auto doAgain = [](const string& mp3) {
-        // Magic number is hopefully not so magic
-        return starts_with(trim(mp3), "<html>") || mp3.size() < 100*1024;
-    };
+    string query = construct_query(request, {"format", "req"});
+    string url = "http://api.pointmp3.com/dl/v2/?" + query;
 
-    auto response = cpr::Get(cpr::Url{url}); bool fail;
-    for (int i = 0; (fail = doAgain(response.text)) && check_successful_response(response, "YouTubeInMP3") && i < MAX_NUM_ATTEMPTS; ++i) {
-        response = cpr::Get(cpr::Url{url});
-    }
-    // check_successful_response here may not be needed
-    return make_tuple(!fail && check_successful_response(response, "YouTubeInMP3"), response.text);
+    auto response = cpr::Get(cpr::Url{url});
+    if (!check_successful_response(response)) return "";
+
+    json resp = json::parse(response.text);
+    response = cpr::Get(cpr::Url{resp["url"].get<string>()});
+    if (!check_successful_response(response) || resp["error"] == true) return "";
+    
+    resp = json::parse(response.text);
+    return resp["error"] == true ? "" : resp["url"];
 }
