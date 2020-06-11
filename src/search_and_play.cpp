@@ -9,11 +9,12 @@
 
 using namespace std;
 
-void search_and_play(const string& song, bool keep, bool show_lyrics, bool verbose) {
+void search_and_play(const string& song, bool keep, bool show_lyrics, 
+                     bool verbose, const string& apikey) {
     map<string, set<string>> stats;
     string fileTitle = keep ? fileify(song) : gen_tmp_file_title();
 
-    download_song_from_youtube(song, fileTitle, verbose, stats);
+    download_song_from_youtube(song, fileTitle, verbose, stats, apikey);
     if (!stats[DOWNLOAD_MISTAKE_MSG].empty() || !stats[DOWNLOAD_SUCC_MSG].empty()
         || !stats[ALREADY_EXISTED_MSG].empty()) {
         if (show_lyrics) {

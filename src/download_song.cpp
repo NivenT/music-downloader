@@ -13,12 +13,15 @@ using namespace std;
 // I think writing C code recently has made me much more accepting of globals
 std::vector<YTConverter*> converters;
 
+// Why do I have both this and download_song?
+// TODO: git blame
 void download_song_from_youtube(const string& song, const string& file_pattern, 
-                                bool verbose, map<string, set<string>>& stats) {
+                                bool verbose, map<string, set<string>>& stats,
+                                const string& apikey) {
     static const float SIMILARITY_THRESHOLD = 0.63;
 
     string songId, songTitle;
-    tie(songId, songTitle) = search_youtube_for_song(song, verbose);
+    tie(songId, songTitle) = search_youtube_for_song(song, verbose, apikey);
 
     string folder, file;
     tie(folder, file) = split_path(file_pattern);
@@ -83,12 +86,14 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
 }
 
 void download_song(const string& song, const string& saveFolder, 
-                    bool verbose, map<string, set<string>>& stats) {
-    download_song_from_youtube(song, saveFolder, verbose, stats);
+                    bool verbose, map<string, set<string>>& stats,
+                    const string& apikey) {
+    download_song_from_youtube(song, saveFolder, verbose, stats, apikey);
 }
 
 void download_songs(const string& songList, const string& saveFolder, 
-                    bool verbose, map<string, set<string>>& stats) {
+                    bool verbose, map<string, set<string>>& stats,
+                    const string& apikey) {
     cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<endl
              <<endl;
 
@@ -100,7 +105,7 @@ void download_songs(const string& songList, const string& saveFolder,
             // just to make sure statistics print in alphabetical order
             transform(song.begin(), song.end(), song.begin(), ::tolower);
 
-            download_song(song, saveFolder, verbose, stats);
+            download_song(song, saveFolder, verbose, stats, apikey);
             cout<<endl;
         }
     }

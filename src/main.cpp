@@ -20,11 +20,11 @@ R"({progName}
 
 Usage:
     {progName} (-h | --help)
-    {progName} [--songs FILE] [--dest FOLDER] [-v | --verbose]
+    {progName} (--api-key KEY | --api-file FILE) [--songs FILE] [--dest FOLDER] [-v | --verbose]
     {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
-    {progName} --download SONGS... [--dest FOLDER] [-v | --verbose]
+    {progName} (--api-key KEY | --api-file FILE) --download SONGS... [--dest FOLDER] [-v | --verbose]
     {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
-    {progName} --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
+    {progName} (--api-key KEY | --api-file FILE) --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
     -h --help             Prints this message.
@@ -41,6 +41,8 @@ Options:
     --show-play-output    Does not use quiet flag when running play command
     --play-song SONGS...  Song to search for online and then play if found
     --keep                Keep a saved .mp3 of the song
+    --api-key KEY         The YouTube API key to use
+    --api-file FILE       A file containing the YouTube API key
 )";
 
 // TODO: Restructure this in a slightly cleaner way
@@ -59,6 +61,16 @@ vector<const char*> splitArgs(int argc, const char** argv, const char* type) {
     return args;
 }
 
+string get_key(docopt::value key, const docopt::value& file_name) {
+    if (key.isString() && key.asString() != "") return key.asString();
+    if (file_name.isString() && file_name.asString() != "") {
+        string ret;
+        read_file(file_name.asString(), ret);
+        return ret;
+    }
+    return "";
+}
+
 int main(int argc, const char** argv) {
     static const string stars(100, '*');
     srand(time(nullptr));
@@ -75,7 +87,8 @@ int main(int argc, const char** argv) {
            saveFolder = args["--dest"].asString(),
            song = args["--lyrics"].asString(),
            saveFile = args["--save"].asString(),
-           songFolder = args["--dir"].asString();
+           songFolder = args["--dir"].asString(),
+           apikey = trim(get_key(args["--api-key"], args["--api-file"]));
 
     bool print = !args["--hide"].asBool(),
          verbose = args["--verbose"].asBool(),
@@ -92,6 +105,8 @@ int main(int argc, const char** argv) {
     converters.push_back(new PointMP3);
     converters.push_back(new ConvertMP3);
 
+    //if (verbose) cout<<"Using APIKEY: "<<apikey<<endl;
+
     if (song != "") {
         find_lyrics(song, saveFile, print, verbose);
     } else if (!songs.empty()) {
@@ -99,7 +114,7 @@ int main(int argc, const char** argv) {
             cout<<stars<<endl;
             cout<<"Downloading \""<<songs[i]<<"\" and saving song in \""<<saveFolder<<"\""<<endl
                 <<endl;
-            download_song(songs[i], saveFolder, verbose, stats);
+            download_song(songs[i], saveFolder, verbose, stats, apikey);
         }
     } else if (!(songs = args["--play"].asStringList()).empty()) {
         for (int i = 0; i < songs.size(); i++) {
@@ -109,10 +124,10 @@ int main(int argc, const char** argv) {
     } else if (!(songs = args["--play-song"].asStringList()).empty()) {
         for (int i = 0; i < songs.size(); i++) {
             cout<<stars<<endl;
-            search_and_play(songs[i], keep, lyrics, verbose);
+            search_and_play(songs[i], keep, lyrics, verbose, apikey);
         }
     } else {
-        download_songs(songList, saveFolder, verbose, stats);
+        download_songs(songList, saveFolder, verbose, stats, apikey);
         print_statistics(stats);
     }
 

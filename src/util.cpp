@@ -26,7 +26,7 @@ bool starts_with(const string& str, const string& prefix) {
 }
 
 bool ends_with(const string& str, const string& suffix) {
-    return str.rfind(suffix) == str.size() - suffix.size();
+  return suffix.size() <= str.size() && str.rfind(suffix) == str.size() - suffix.size();
 }
 
 string song_probably_exists(const string& title, const string& folder) {

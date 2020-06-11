@@ -2,8 +2,6 @@
 #include "util.h"
 #include "web.h"
 
-#define APIKEY "AIzaSyDxmk_iusdpHuj5VfFnqyvweW1Lep0j2oc"
-
 using json = nlohmann::json;
 using namespace std;
 
@@ -18,6 +16,7 @@ cpr::Response YTConverter::try_download(const string& url) {
 
 tuple<bool, string> YTConverter::download_song(const string& url, bool verbose) {
     bool fail;
+    // Should did be a do/while?
     auto response = try_download(url);
     for (int i = 0; (fail = doAgain(response.text)) && check_successful_response(response) && i < MAX_NUM_ATTEMPTS; ++i) {
         if (verbose && i%10 == 9) cout<<TAB<<TAB<<TAB<<"Attempt "<<(i+1)<<" / "<<MAX_NUM_ATTEMPTS<<"..."<<endl;
