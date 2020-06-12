@@ -5,7 +5,7 @@ Automatically downloads music
 
 This is a simple program to download music for you. You provide it a file containing a list of songs (one title per line). It searches for them on youtube, and then uses a youtube -> mp3 converter to download them as .mp3 files to a directory of your choice. It can also does other things like search for lyrics and plays local .mp3 files (I don't think this last one works on Windows).
 
-You also need to supply your own api key, but you can easily get one by going to [this link](https://console.developers.google.com/apis/credentials).
+You may also need to supply your own api key, but you can easily get one by going to [this link](https://console.developers.google.com/apis/credentials). If you don't want to do this, you can still use the all the functionality of the program; you just need to supply youtube video ids in place of song titles. See the "How to Run" section for more usage info.
 
 ## How to Build
 To build, clone this repository and then use cmake and make. The commands you need to run should be similar to those below
@@ -23,32 +23,40 @@ make
 Run the program from terminal. The usage is as follows:
 ```
 ./music-downloader
+
 Usage:
     ./music-downloader (-h | --help)
     ./music-downloader (--api-key KEY | --api-file FILE) [--songs FILE] [--dest FOLDER] [-v | --verbose]
-    ./music-downloader --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
     ./music-downloader (--api-key KEY | --api-file FILE) --download SONGS... [--dest FOLDER] [-v | --verbose]
-    ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
     ./music-downloader (--api-key KEY | --api-file FILE) --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
+    ./music-downloader --yt-ids SONGS... [--dest FOLDER] [-v | --verbose]
+    ./music-downloader --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
+    ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
+    ./music-downloader --play-from-ids SONGS... [--keep] [--show-lyrics] [-v | --verbose]
 
 Options:
-    -h --help             Prints this message.
-    --songs FILE          Text file containing songs to download [default: songs.txt]
-    --dest FOLDER         Destination folder (where downloaded songs are saved) [default: songs/]
-    -v --verbose          Use verbose output
-    --lyrics SONG         Name of song to find the lyrics of [default: ]
-    --save FILE           File to save the lyrics to [default: ]
-    --hide                Doesn't print the lyrics to the terminal
-    --download SONGS...   List of songs to download
-    --play FILES...       List of MP3 files to play
-    --dir FOLDER          The folder containing the files to play [default: .]
-    --show-lyrics         Prints lyrics of song to the screen
-    --show-play-output    Does not use quiet flag when running play command
-    --play-song SONGS...  Song to search for online and then play if found
-    --keep                Keep a saved .mp3 of the song
-    --api-key KEY         The YouTube API key to use
-    --api-file FILE       A file containing the YouTube API key
+    -h --help                   Prints this message.
+    --songs FILE                Text file containing songs to download [default: songs.txt]
+    --dest FOLDER               Destination folder (where downloaded songs are saved) [default: songs/]
+    -v --verbose                Use verbose output
+    --lyrics SONG               Name of song to find the lyrics of [default: ]
+    --save FILE                 File to save the lyrics to [default: ]
+    --hide                      Doesn't print the lyrics to the terminal
+    --download SONGS...         List of songs to download
+    --play FILES...             List of MP3 files to play
+    --dir FOLDER                The folder containing the files to play [default: .]
+    --show-lyrics               Prints lyrics of song to the screen
+    --show-play-output          Does not use quiet flag when running play command
+    --play-song SONGS...        List of songs to search for online and then play if found
+    --keep                      Keep a saved .mp3 of the song
+    --api-key KEY               The YouTube API key to use
+    --api-file FILE             A file containing the YouTube API key
+    --yt-ids SONGS...           List of ids (the part after "v=" in their YouTube URL) of YouTube videos to download
+    --play-from-ids SONGS...    List of ids of YouTube videos to download and then play
 ```
+
+The depending on how you call it, the program will download music, find and print out lyrics, or play some songs. In order to perform any action which requires downloading videos, you need to supply either 'an api key and title(s) to search for' or 'the id of the video(s) to use' as directed in the usage above.
+
 Examples include
 
 * `./music-downloader --api-file key.txt` This will download all the songs in songs.txt and save them in a folder named songs
