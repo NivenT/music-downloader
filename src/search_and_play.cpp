@@ -9,12 +9,8 @@
 
 using namespace std;
 
-void search_and_play(const string& song, bool keep, bool show_lyrics, 
-                     bool verbose, const string& apikey) {
-    map<string, set<string>> stats;
-    string fileTitle = keep ? fileify(song) : gen_tmp_file_title();
-
-    download_song_from_youtube(song, fileTitle, verbose, stats, apikey);
+static void play(map<string, set<string>>& stats, bool show_lyrics, bool keep,
+                 const string& fileTitle, const string& song, bool verbose) {
     if (!stats[DOWNLOAD_MISTAKE_MSG].empty() || !stats[DOWNLOAD_SUCC_MSG].empty()
         || !stats[ALREADY_EXISTED_MSG].empty()) {
         if (show_lyrics) {
@@ -30,4 +26,24 @@ void search_and_play(const string& song, bool keep, bool show_lyrics,
     } else {
         cout<<"Could not find "<<song<<endl;
     }
+}
+
+void search_and_play(const string& song, bool keep, bool show_lyrics, 
+                     bool verbose, const string& apikey) {
+    map<string, set<string>> stats;
+    string fileTitle = keep ? fileify(song) : gen_tmp_file_title();
+
+    download_song(song, fileTitle, verbose, stats, apikey);
+    play(stats, show_lyrics, keep, fileTitle, song, verbose);
+}
+
+void search_and_play_given_id(const string& id, bool keep, bool show_lyrics,
+                              bool verbose) {
+    map<string, set<string>> stats;
+
+    string songTitle = get_title_from_id(id, verbose);
+    string fileTitle = keep ? fileify(songTitle) : gen_tmp_file_title();
+
+    download_song_given_id(id, songTitle, fileTitle, verbose, stats);
+    play(stats, show_lyrics, keep, fileTitle, songTitle, verbose);
 }

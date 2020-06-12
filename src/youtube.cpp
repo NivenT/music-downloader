@@ -65,3 +65,31 @@ tuple<string, string> search_youtube_for_song(const string& song, bool verbose,
     }
     return make_tuple("", "");
 }
+
+#define TITLE_UNKNOWN(id) "UKNOWN_TITLE_ID_" + id
+string get_title_from_id(const string& id, bool verbose) {
+    string url = "https://www.youtube.com/watch?v=" + id;
+    if (verbose) {
+        cout<<"Attempting to get the title of video with id "<<id<<"..."<<endl;
+    }
+    auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
+    if (!check_successful_response(response, "YouTube")) {
+        if (verbose) cout<<"Could not find title"<<endl;
+        return TITLE_UNKNOWN(id);
+    }
+    // titles.size() <= 1 because of call to match_regex(blah, blah, 1, blah)
+    auto titles = match_regex(response.text, 
+                              R"#(meta name="title".*content="([^"]*)")#",
+                              1, 1);
+    if (titles.empty()) {
+        if (verbose) cout<<"Could not find title"<<endl;
+        return TITLE_UNKNOWN(id);
+    }
+    // just to make sure statistics print in alphabetical order
+    string title = *titles.begin();
+    transform(title.begin(), title.end(), title.begin(), ::tolower);
+    if (verbose) {
+        cout<<"YT video with id "<<id<<" has title \""<<title<<"\""<<endl;
+    }
+    return title;
+}

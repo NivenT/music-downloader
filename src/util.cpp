@@ -22,7 +22,7 @@ bool song_exists(const string& title) {
 }
 
 bool starts_with(const string& str, const string& prefix) {
-    return str.find(prefix) == 0;
+    return prefix.size() <= str.size() && str.find(prefix) == 0;
 }
 
 bool ends_with(const string& str, const string& suffix) {
@@ -77,6 +77,7 @@ string replace_all(const string& str, const vector<vector<string>> os, const vec
 }
 
 string trim(const string& str) {
+    if (str.empty()) return str;
     static const string whitespace = " \t\n\0";
 
     auto begin = str.find_first_not_of(whitespace);

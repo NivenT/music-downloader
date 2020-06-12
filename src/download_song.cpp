@@ -13,21 +13,17 @@ using namespace std;
 // I think writing C code recently has made me much more accepting of globals
 std::vector<YTConverter*> converters;
 
-// Why do I have both this and download_song?
-// TODO: git blame
-void download_song_from_youtube(const string& song, const string& file_pattern, 
-                                bool verbose, map<string, set<string>>& stats,
-                                const string& apikey) {
+void download_song_given_id(const string& songId, const string& songTitle,
+                            const string& saveFolder, bool verbose,
+                            map<string, set<string>>& stats) {
     static const float SIMILARITY_THRESHOLD = 0.63;
 
-    string songId, songTitle;
-    tie(songId, songTitle) = search_youtube_for_song(song, verbose, apikey);
-
     string folder, file;
-    tie(folder, file) = split_path(file_pattern);
+    tie(folder, file) = split_path(saveFolder);
     folder = folder == "" ? "./" : folder;
     string fileTitle = folder + (file == "" ? fileify(songTitle) : file);
 
+    const string& song = songTitle;
     string match;
     if (songId == "") {
         cout<<"\""<<song<<"\" could not be found"<<endl;
@@ -59,7 +55,7 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
                 stats[NOT_FOUND_MSG].insert(song);
                 return;
             } else if (verbose) {
-                cout<<TAB<<TAB<<"Donwload url: "<<downloadUrl<<endl;
+                cout<<TAB<<TAB<<"Download url: "<<downloadUrl<<endl;
             }
 
             string songData; bool succ;
@@ -88,27 +84,9 @@ void download_song_from_youtube(const string& song, const string& file_pattern,
 void download_song(const string& song, const string& saveFolder, 
                     bool verbose, map<string, set<string>>& stats,
                     const string& apikey) {
-    download_song_from_youtube(song, saveFolder, verbose, stats, apikey);
-}
-
-void download_songs(const string& songList, const string& saveFolder, 
-                    bool verbose, map<string, set<string>>& stats,
-                    const string& apikey) {
-    cout<<"Downloading songs from file \""<<songList<<"\" and saving them in folder \""<<saveFolder<<"\""<<endl
-             <<endl;
-
-    ifstream songFile(songList.c_str());
-
-    string song;
-    while (getline(songFile, song)) {
-        if (!starts_with(song, "added on:")) {
-            // just to make sure statistics print in alphabetical order
-            transform(song.begin(), song.end(), song.begin(), ::tolower);
-
-            download_song(song, saveFolder, verbose, stats, apikey);
-            cout<<endl;
-        }
-    }
+    string songId, songTitle;
+    tie(songId, songTitle) = search_youtube_for_song(song, verbose, apikey);
+    download_song_given_id(songId, songTitle, saveFolder, verbose, stats);
 }
 
 void print_statistics(map<string, set<string>> stats) {
