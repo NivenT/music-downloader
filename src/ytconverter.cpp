@@ -65,3 +65,17 @@ string PointMP3::get_link(const string& id) {
     resp = json::parse(response.text);
     return resp["error"] == true ? "" : resp["url"];
 }
+
+// https://www.320youtube.com/v3/watch?v=nROM6th0teA
+string ThreeTwentyYT::get_link(const string& id) {
+    auto response = cpr::Get(cpr::Url{"http://320youtube.com/v3/watch?v=" + id});
+    if (!check_successful_response(response)) return "";
+
+    auto links = match_regex(response.text, "href=\"([^\"]*)\"", -1, 1);
+    for (const auto& link : links) {
+        if (link.find("download") != string::npos) {
+            return link;
+        }   
+    }
+    return "";
+}

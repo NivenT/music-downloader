@@ -26,7 +26,7 @@ public:
 
 class ConvertMP3 : public YTConverter {
 public:
-    ConvertMP3() : YTConverter("ConvertMP3", 20) {}
+    ConvertMP3() : YTConverter("ConvertMP3", 30) {}
     std::string get_link(const std::string& id);
 };
 
@@ -38,5 +38,12 @@ private:
     cpr::Response try_download(const std::string& url);
 public:
     PointMP3() : YTConverter("PointMP3", 40) {}
+    std::string get_link(const std::string& id);
+};
+
+class ThreeTwentyYT : public YTConverter {
+private:
+public:
+    ThreeTwentyYT() : YTConverter("320Youtube", 30) {}
     std::string get_link(const std::string& id);
 };
