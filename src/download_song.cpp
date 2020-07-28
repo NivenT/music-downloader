@@ -43,7 +43,8 @@ void download_song_given_id(const string& songId, const string& songTitle,
             cout<<"Downloading video with Id "<<songId<<"..."<<endl;
         }
 
-        for (auto& converter : converters) {
+        for (int i = 0; i < converters.size(); i++) {
+            auto& converter = converters[i];
             cout<<TAB<<"Attempting to use "<<converter->get_name()<<" to download video..."<<endl;
             const string downloadUrl = converter->get_link(songId);
             if (downloadUrl == "") {
@@ -72,12 +73,9 @@ void download_song_given_id(const string& songId, const string& songTitle,
                 break;
             } else {
                 cout<<TAB<<converter->get_name()<<" failed to download "<<songTitle<<endl;
-                continue;
-
-                // TODO: Properly collect stats
-                stats[DOWNLOAD_FAIL_MSG].insert(song);
+                if (i == converters.size() - 1) stats[DOWNLOAD_FAIL_MSG].insert(song);
             }
-        }   
+        }
     }
 }
 
