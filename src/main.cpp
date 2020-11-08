@@ -158,7 +158,7 @@ int main(int argc, const char** argv) {
 
         string song;
         while (getline(songFile, song)) {
-            if (!starts_with(song, "added on:")) {
+            if (!starts_with(song, "added on:") && !song.empty()) {
                 // just to make sure statistics print in alphabetical order
                 transform(song.begin(), song.end(), song.begin(), ::tolower);
 

@@ -5,7 +5,7 @@ Automatically downloads music
 
 This is a simple program to download music for you. You provide it a file containing a list of songs (one title per line). It searches for them on youtube, and then uses a youtube -> mp3 converter to download them as .mp3 files to a directory of your choice. It can also does other things like search for lyrics and plays local .mp3 files (I don't think this last one works on Windows).
 
-You may also need to supply your own api key, but you can easily get one by going to [this link](https://console.developers.google.com/apis/credentials). If you don't want to do this, you can still use the all the functionality of the program; you just need to supply youtube video ids in place of song titles. See the "How to Run" section for more usage info.
+This is *not* necessary, but you can also supply your own api key; you can easily get one by going to [this link](https://console.developers.google.com/apis/credentials). Doing this will likely improve results slightly. See the "How to Run" section for more usage info.
 
 ## How to Build
 To build, clone this repository and then use cmake and make. The commands you need to run should be similar to those below
@@ -26,9 +26,9 @@ Run the program from terminal. The usage is as follows:
 
 Usage:
     ./music-downloader (-h | --help)
-    ./music-downloader (--api-key KEY | --api-file FILE) [--songs FILE] [--dest FOLDER] [-v | --verbose]
-    ./music-downloader (--api-key KEY | --api-file FILE) --download SONGS... [--dest FOLDER] [-v | --verbose]
-    ./music-downloader (--api-key KEY | --api-file FILE) --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
+    ./music-downloader [--api-key KEY | --api-file FILE] [--songs FILE] [--dest FOLDER] [-v | --verbose]
+    ./music-downloader [--api-key KEY | --api-file FILE] --download SONGS... [--dest FOLDER] [-v | --verbose]
+    ./music-downloader [--api-key KEY | --api-file FILE] --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
     ./music-downloader --yt-ids SONGS... [--dest FOLDER] [-v | --verbose]
     ./music-downloader --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
     ./music-downloader --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
@@ -55,11 +55,14 @@ Options:
     --play-from-ids SONGS...    List of ids of YouTube videos to download and then play
 ```
 
-The depending on how you call it, the program will download music, find and print out lyrics, or play some songs. In order to perform any action which requires downloading videos, you need to supply either 'an api key and title(s) to search for' or 'the id of the video(s) to use' as directed in the usage above.
+Depending on how you call it, the program will download music, find and print out lyrics, or play some songs. If it is not clear what any of the usage forms above does, then open an issue asking about it. 
+
+Do note that arguments wrapped in square brackets [] are optional for that usage case (take not of the default values in the description of the options), while argument wrapped in round brackets () are required for their usage case.
 
 Examples include
 
-* `./music-downloader --api-file key.txt` This will download all the songs in songs.txt and save them in a folder named songs
+* `./music-downloader --api-file key.txt` This will download all the songs in songs.txt and save them in a folder named songs.
+* `./music-downloader` This does the same thing as the above example, except it searches youtube directly instead of through the official api.
 * `./music-downloader --lyrics "Thriller"` This will search for the song Thriller and print its lyrics
 * `./music-downloader --api-file key.txt --dest music -v` This will download all the songs in songs.txt and save them in a folder named music. It will also print verbose output.
 * `./music-downloader --api-file key.txt --download "canon in d"` This will download Canon in D and save is in a folder names songs.
