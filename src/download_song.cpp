@@ -84,6 +84,7 @@ void download_song(const string& song, const string& saveFolder,
                     const string& apikey) {
     string songId, songTitle;
     tie(songId, songTitle) = search_youtube_for_song(song, verbose, apikey);
+
     download_song_given_id(songId, songTitle, saveFolder, verbose, stats);
 }
 

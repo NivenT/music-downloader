@@ -22,9 +22,9 @@ R"({progName}
 
 Usage:
     {progName} (-h | --help)
-    {progName} (--api-key KEY | --api-file FILE) [--songs FILE] [--dest FOLDER] [-v | --verbose]
-    {progName} (--api-key KEY | --api-file FILE) --download SONGS... [--dest FOLDER] [-v | --verbose]
-    {progName} (--api-key KEY | --api-file FILE) --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
+    {progName} [--api-key KEY | --api-file FILE] [--songs FILE] [--dest FOLDER] [-v | --verbose]
+    {progName} [--api-key KEY | --api-file FILE] --download SONGS... [--dest FOLDER] [-v | --verbose]
+    {progName} [--api-key KEY | --api-file FILE] --play-song SONGS... [--keep] [--show-lyrics] [-v | --verbose]
     {progName} --yt-ids SONGS... [--dest FOLDER] [-v | --verbose]
     {progName} --lyrics SONG [--save FILE] [--hide] [-v | --verbose]
     {progName} --play FILES... [--dir FOLDER] [--show-lyrics] [--show-play-output] [-v | --verbose]
@@ -115,7 +115,7 @@ int main(int argc, const char** argv) {
     converters.push_back(new PointMP3);
     converters.push_back(new ConvertMP3);
 
-    //if (verbose) cout<<"Using APIKEY: "<<apikey<<endl;
+    //if (verbose) cout<<"Using APIKEY: \""<<apikey<<"\""<<endl;
 
     if (song != "") {
         find_lyrics(song, saveFile, print, verbose);
