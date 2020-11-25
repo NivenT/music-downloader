@@ -11,19 +11,21 @@ using namespace std;
 // Is server even the right name for that argument?
 bool check_successful_response(const cpr::Response& response, const string& server) {
     if (!response.status_code) {
-        cout<<"Error occured ("<<(int)response.error.code<<"):"<<endl
+        cout<<"Error occurred ("<<(int)response.error.code<<"):"<<endl
             <<response.error.message<<endl
             <<endl
-            <<"Exiting program"<<endl
+            <<"Program used to exit in this case, but no longer does."<<endl
+            <<"Unclear how properly it will handle this error..."<<endl
             <<endl;
-        exit(0xBAD);
+        return false;
     } else if (response.status_code/100 == 4) {
         cout<<server<<" response ("<<response.status_code<<"):"<<endl
             <<response.text<<endl
             <<endl
-            <<"Exiting program"<<endl
+            <<"Program used to exit in this case, but no longer does."<<endl
+            <<"Unclear how properly it will handle this error..."<<endl
             <<endl;
-        exit(0xBAD);
+        return false;
     } else if (response.status_code/100 != 2) {
         cout<<server<<" response ("<<response.status_code<<"):"<<endl
             <<response.text<<endl

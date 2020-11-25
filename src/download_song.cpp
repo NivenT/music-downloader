@@ -25,11 +25,7 @@ void download_song_given_id(const string& songId, const string& songTitle,
 
     const string& song = songTitle;
     string match;
-    if (songId == "") {
-        cout<<"\""<<song<<"\" could not be found"<<endl;
-
-        stats[NOT_FOUND_MSG].insert(song);
-    } else if (song_exists(fileTitle)) {
+    if (song_exists(fileTitle)) {
         cout<<"\""<<song<<"\" has already been downloaded"<<endl;
 
         stats[ALREADY_EXISTED_MSG].insert(song);
@@ -43,23 +39,20 @@ void download_song_given_id(const string& songId, const string& songTitle,
             cout<<"Downloading video with Id "<<songId<<"..."<<endl;
         }
 
+        bool succ = false;
         for (int i = 0; i < converters.size(); i++) {
             auto& converter = converters[i];
             cout<<TAB<<"Attempting to use "<<converter->get_name()<<" to download video..."<<endl;
             const string downloadUrl = converter->get_link(songId);
             if (downloadUrl == "") {
-                cout<<TAB<<"Could not find song"<<endl
+                cout<<TAB<<converter->get_name()<<" could not find song"<<endl
                     <<endl;
                 continue;
-
-                // TODO: Properly collect stats
-                stats[NOT_FOUND_MSG].insert(song);
-                return;
             } else if (verbose) {
                 cout<<TAB<<TAB<<"Download url: "<<downloadUrl<<endl;
             }
 
-            string songData; bool succ;
+            string songData;
             tie(succ, songData) = converter->download_song(downloadUrl, verbose);
             if (succ) {
                 cout<<TAB<<"Successfully downloaded "<<songTitle<<endl;
@@ -73,9 +66,9 @@ void download_song_given_id(const string& songId, const string& songTitle,
                 break;
             } else {
                 cout<<TAB<<converter->get_name()<<" failed to download "<<songTitle<<endl;
-                if (i == converters.size() - 1) stats[DOWNLOAD_FAIL_MSG].insert(song);
             }
         }
+        if (!succ) stats[DOWNLOAD_FAIL_MSG].insert(song);
     }
 }
 
@@ -84,12 +77,17 @@ void download_song(const string& song, const string& saveFolder,
                     const string& apikey) {
     string songId, songTitle;
     tie(songId, songTitle) = search_youtube_for_song(song, verbose, apikey);
+    if (songId == "") {
+        cout<<"\""<<song<<"\" could not be found"<<endl;
 
-    download_song_given_id(songId, songTitle, saveFolder, verbose, stats);
+        stats[NOT_FOUND_MSG].insert(song);
+    } else {
+        download_song_given_id(songId, songTitle, saveFolder, verbose, stats);
+    }
 }
 
 void print_statistics(map<string, set<string>> stats) {
-    static const int PRINT_THRESHOLD = 15;
+    static const int PRINT_THRESHOLD = 30;
 
     cout<<"*******Download summary*******"<<endl
         <<endl;

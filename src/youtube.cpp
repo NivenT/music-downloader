@@ -1,4 +1,5 @@
 #include <fstream>
+#include <stack>
 
 #include "util.h"
 #include "web.h"
@@ -61,10 +62,64 @@ tuple<string, string> search_youtube_with_api(const string& song, const string& 
     return make_tuple("", "");
 }
 
-// TODO: unify below and above functions more
+// TODO: unify both search_youtube functions
 
 #define SCRAPE_START_SENTINEL "// scraper_data_begin"
 #define SCRAPE_END_SENTINEL   "// scraper_data_end"
+#define JSON_VAR              "var ytInit"
+string extract_meta(const string& resp, bool verbose) {
+    cout<<"Extracting search results page metadata..."<<endl;
+
+    size_t beg = resp.find(SCRAPE_START_SENTINEL);
+    size_t end = resp.find(SCRAPE_END_SENTINEL);
+    if (beg != string::npos && end != string::npos) {
+        if (verbose) cout<<TAB<<"Found scraper tags"<<endl;
+        string meta_data = resp.substr(beg + sizeof(SCRAPE_START_SENTINEL),
+                                                end - beg - sizeof(SCRAPE_START_SENTINEL));
+        beg = meta_data.find_first_of('{');
+        end = meta_data.find_last_of('}');
+        meta_data = meta_data.substr(beg, end - beg + 1);
+        return meta_data;
+    }
+    if (verbose) cout<<TAB<<"Did not find scraper tags"<<endl;
+
+    beg = resp.find(JSON_VAR);
+    if (beg != string::npos) {
+        beg = resp.find('{', beg);
+        // We love clean code
+        if (beg != string::npos) {
+            if (verbose) cout<<TAB<<"Found 'ytInit...' variable"<<endl;
+
+            stack<char> bracks;
+            bracks.push('{');
+            for (end = beg + 1; !bracks.empty(); end++) {
+                if (end >= resp.size()) {
+                    end = beg;
+                    break;
+                }
+
+                if (bracks.top() == '"') {
+                    if (resp[end] == '"') bracks.pop();
+                } else if (resp[end] == '{' || resp[end] == '}') {
+                    if (bracks.top() == resp[end]) {
+                        bracks.push(resp[end]);
+                    } else {
+                        bracks.pop();
+                    }
+                } else if (resp[end] == '"') {
+                    bracks.push(resp[end]);
+                }
+            }
+            //printf("beg (%ld): %c and end (%ld): %c\n", beg, resp[beg], end, resp[end]);
+            
+            if (end <= beg) {
+                if (verbose) cout<<TAB<<"Failed to locate metadata"<<endl;
+            } else return resp.substr(beg, end - beg);
+        }
+    } else if (verbose) cout<<TAB<<"Did not find 'ytInit...' variable"<<endl;
+    return "";
+}
+
 tuple<string, string> search_youtube_without_api(const string& song, const string& song_q,
                                                  bool verbose) {
     json request;
@@ -79,15 +134,10 @@ tuple<string, string> search_youtube_without_api(const string& song, const strin
     
     auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
     if (check_successful_response(response, "YouTube")) {
-        size_t beg = response.text.find(SCRAPE_START_SENTINEL);
-        size_t end = response.text.find(SCRAPE_END_SENTINEL);
-        string meta_data = response.text.substr(beg + sizeof(SCRAPE_START_SENTINEL),
-                                                      end - beg - sizeof(SCRAPE_START_SENTINEL));
-        beg = meta_data.find_first_of('{');
-        end = meta_data.find_last_of('}');
-        meta_data = meta_data.substr(beg, end - beg + 1);
-
-        json data = json::parse(meta_data);
+        string meta = extract_meta(response.text, verbose);
+        if (meta.empty()) return make_tuple("", "");
+        //cout<<meta<<endl;
+        json data = json::parse(meta);
         // yeesh
         json content = data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"];
 
