@@ -17,6 +17,7 @@ extern std::string to_hex(unsigned char c);
 extern std::string fileify(const std::string& title);
 extern std::string urlify(const std::string& query);
 extern std::string shellify(const std::string& cmd);
+extern std::string extract_title(const std::string& path);
 extern std::string gen_tmp_file_title();
 extern std::tuple<std::string, std::string> split_path(const std::string& path);
 extern int levenshtein(const std::string& str1, const std::string& str2);

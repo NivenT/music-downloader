@@ -15,6 +15,6 @@ extern void download_song(const std::string&, const std::string&, bool,
                           std::map<std::string, std::set<std::string>>&,
                           const std::string&);
 extern void download_song_given_id(const std::string&, const std::string&, 
-                                   const std::string&, bool,
+                                   const std::string&, const std::string&, bool,
                                    std::map<std::string, std::set<std::string>>&);
 extern void print_statistics(std::map<std::string, std::set<std::string>>);

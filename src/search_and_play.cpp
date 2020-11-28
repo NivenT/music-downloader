@@ -44,6 +44,6 @@ void search_and_play_given_id(const string& id, bool keep, bool show_lyrics,
     string songTitle = get_title_from_id(id, verbose);
     string fileTitle = keep ? fileify(songTitle) : gen_tmp_file_title();
 
-    download_song_given_id(id, songTitle, fileTitle, verbose, stats);
+    download_song_given_id(id, songTitle, songTitle, fileTitle, verbose, stats);
     play(stats, show_lyrics, keep, fileTitle, songTitle, verbose);
 }

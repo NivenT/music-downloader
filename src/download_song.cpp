@@ -13,8 +13,9 @@ using namespace std;
 // I think writing C code recently has made me much more accepting of globals
 std::vector<YTConverter*> converters;
 
-void download_song_given_id(const string& songId, const string& songTitle,
-                            const string& saveFolder, bool verbose,
+void download_song_given_id(const string& songId, const string& song,
+                            const string& songTitle, const string& saveFolder, 
+                            bool verbose,
                             map<string, set<string>>& stats) {
     static const float SIMILARITY_THRESHOLD = 0.63;
 
@@ -23,7 +24,6 @@ void download_song_given_id(const string& songId, const string& songTitle,
     folder = folder == "" ? "./" : folder;
     string fileTitle = folder + (file == "" ? fileify(songTitle) : file);
 
-    const string& song = songTitle;
     string match;
     if (song_exists(fileTitle)) {
         cout<<"\""<<song<<"\" has already been downloaded"<<endl;
@@ -82,7 +82,7 @@ void download_song(const string& song, const string& saveFolder,
 
         stats[NOT_FOUND_MSG].insert(song);
     } else {
-        download_song_given_id(songId, songTitle, saveFolder, verbose, stats);
+        download_song_given_id(songId, song, songTitle, saveFolder, verbose, stats);
     }
 }
 
@@ -95,7 +95,8 @@ void print_statistics(map<string, set<string>> stats) {
         const string& msg = pair.first;
         const set<string>& data = pair.second;
 
-        cout<<data.size()<<" songs "<<msg<<". They were:"<<endl;
+        auto s = data.size() == 1 ? "" : "s";
+        cout<<data.size()<<" song"<<s<<" "<<msg<<". They were:"<<endl;
         if (data.size() <= PRINT_THRESHOLD) {
             for (const auto& song : data) {
                 cout<<TAB<<song<<endl;

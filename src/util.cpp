@@ -11,7 +11,8 @@
 
 #include "util.h"
 
-#define ILLEGAL_CHARCTERS {".", "|", ":", "\"", "'", "(", ")", "&", "[", "]"}
+#define ILLEGAL_CHARCTERS {".", "%", "#" "|", ";", ":", "\"", "'", \
+                           "(", ")", "&", "[", "]", ","}
 
 using namespace std;
 
@@ -30,10 +31,10 @@ bool ends_with(const string& str, const string& suffix) {
 }
 
 string song_probably_exists(const string& title, const string& folder) {
-    // title_distance is not realiable enough for this function to work well
+    // title_distance is not reliable enough for this function to work well
     return "";
 
-    // Possible too generous?
+    // Possibly too generous?
     static const float MATCH_THRESHOLD = 0.35;
 
     string title_without_folder = title.substr(folder.size());
@@ -97,6 +98,12 @@ string to_hex(unsigned char c) {
 string fileify(const string& title) {
     string ret = ends_with(title, ".mp3") ? title.substr(title.size()-4) : title;
     return replace_all(ret, {{"/", "\\", " "}, ILLEGAL_CHARCTERS}, {"_", ""}) + ".mp3";
+}
+
+string extract_title(const string& path) {
+    string file = std::get<1>(split_path(path));
+    file = file.substr(0, file.size() - 4);
+    return replace_all(file, "_", " ");
 }
 
 string urlify(const string& query) {

@@ -46,9 +46,12 @@ void play_song(const string& file, bool show_lyrics, bool show_output, bool verb
         string title, artist;
         if (!starts_with(data, "ID3")) {
             cout<<"MP3 file must use ID3v2 tag if you want lyrics"<<endl;
-        } else if (!read_tag(data, title, artist)) {
-            cout<<"Could not extract title and artist information from MP3"<<endl;
         } else {
+            if (!read_tag(data, title, artist)) {
+                cout<<"Could not extract title and artist information from MP3"<<endl;
+                title = extract_title(file);
+            }
+
             cout<<"The song is \""<<title<<"\" by \""<<(artist == "" ? "unknown" : artist)<<"\""<<endl;
             find_lyrics(trim(artist + " " + title), "", true, verbose);
         }

@@ -141,7 +141,7 @@ int main(int argc, const char** argv) {
             <<endl;
         for (const auto& id : yt_ids) {
             string title = get_title_from_id(id, verbose);
-            download_song_given_id(id, title, saveFolder, verbose, stats);
+            download_song_given_id(id, title, title, saveFolder, verbose, stats);
             cout<<endl;
         }
         print_statistics(stats);

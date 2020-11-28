@@ -20,7 +20,7 @@ make
 ```
 
 ## How to Run
-Run the program from terminal. The usage is as follows:
+Run the program from terminal. The usage is detailed below.
 ```
 ./music-downloader
 
@@ -57,11 +57,12 @@ Options:
 
 Depending on how you call it, the program will download music, find and print out lyrics, or play some songs. If it is not clear what any of the usage forms above does, then open an issue asking about it. 
 
-Do note that arguments wrapped in square brackets [] are optional for that usage case (take not of the default values in the description of the options), while argument wrapped in round brackets () are required for their usage case.
+Do note that arguments wrapped in square brackets `[]` are optional for that usage case (take note of the default values in the description of the options), while argument wrapped in round brackets `()` are required for their usage case.
 
 Examples include
 
-* `./music-downloader --api-file key.txt` This will download all the songs in songs.txt and save them in a folder named songs.
+* `./music-downloader --songs music.txt` This will download all the songs listed in music.txt and save them in a folder named songs.
+* `./music-downloader --api-file key.txt` This will use the api-key found in key.txt to download all the songs in songs.txt and save them in a folder named songs.
 * `./music-downloader` This does the same thing as the above example, except it searches youtube directly instead of through the official api.
 * `./music-downloader --lyrics "Thriller"` This will search for the song Thriller and print its lyrics
 * `./music-downloader --api-file key.txt --dest music -v` This will download all the songs in songs.txt and save them in a folder named music. It will also print verbose output.
@@ -79,7 +80,7 @@ Since song files may have hard to remember names, if you want to play specific s
 
 `./music-downloader --play mj/$(ls mj | grep -i thriller) kw/$(ls kw | grep -i stronger)`
 
-The above will search for a song with thriller (respectively, strong) in the title, and play it. Since the two songs were in different folders, instead of using "--dir", we have to include the folder with the name of the file.
+The above will search for a song with thriller (respectively, stronger) in the title, and play it. Since the two songs were in different folders, instead of using "--dir", we have to include the folder with the name of the file.
 
 ## Details
 - The program retrieves the top 3 results for each song, and selects one to download
@@ -96,6 +97,7 @@ The above will search for a song with thriller (respectively, strong) in the tit
   - skip a song by pressing `Ctrl+c`
   - pause a song by pressing `Crtl+z` and later resume by running `%` from your terminal
 - Every now and then, the youtube -> mp3 converter stops working. When I notice this, I usually just find a different one to use and update the code, so if you run into this issue, either `git pull` or make a new [YTConverter](https://github.com/NivenT/music-downloader/blob/master/include/ytconverter.h) and then submit a pull request.
+- If it fails to get a song, sometimes you can just run it a few more times and it will succeed at least once
 
 ## TODO
 This project is still not done/perfect. The following are things I would like to eventually do
