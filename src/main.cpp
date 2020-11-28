@@ -111,9 +111,9 @@ int main(int argc, const char** argv) {
     saveFolder += ends_with(saveFolder, "/") ? "" : "/";
     songFolder += ends_with(songFolder, "/") ? "" : "/";
 
-    converters.push_back(new ThreeTwentyYT);
-    converters.push_back(new PointMP3);
-    converters.push_back(new ConvertMP3);
+    converters.push_back(new ThreeTwentyYT(verbose));
+    converters.push_back(new PointMP3(verbose));
+    converters.push_back(new ConvertMP3(verbose));
 
     //if (verbose) cout<<"Using APIKEY: \""<<apikey<<"\""<<endl;
 

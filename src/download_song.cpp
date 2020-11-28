@@ -53,7 +53,7 @@ void download_song_given_id(const string& songId, const string& song,
             }
 
             string songData;
-            tie(succ, songData) = converter->download_song(downloadUrl, verbose);
+            tie(succ, songData) = converter->download_song(downloadUrl);
             if (succ) {
                 cout<<TAB<<"Successfully downloaded "<<songTitle<<endl;
                 write_to_mp3(fileTitle, songData, verbose);

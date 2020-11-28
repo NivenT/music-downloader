@@ -14,7 +14,7 @@ cpr::Response YTConverter::try_download(const string& url) {
     return cpr::Get(cpr::Url{url});
 }
 
-tuple<bool, string> YTConverter::download_song(const string& url, bool verbose) {
+tuple<bool, string> YTConverter::download_song(const string& url) {
     bool fail;
     // Should did be a do/while?
     auto response = try_download(url);

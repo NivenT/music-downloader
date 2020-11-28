@@ -29,7 +29,7 @@ tuple<string, string> search_youtube_with_api(const string& song, const string& 
     }
     
     auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
-    if (check_successful_response(response, "YouTube")) {
+    if (check_successful_response(response, "YouTube", verbose)) {
         json resp = json::parse(response.text);
 
         int num_downloads = min<int>(resp["items"].size(), MAX_NUM_RESULTS_PER_SONG);
@@ -133,7 +133,7 @@ tuple<string, string> search_youtube_without_api(const string& song, const strin
     }
     
     auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
-    if (check_successful_response(response, "YouTube")) {
+    if (check_successful_response(response, "YouTube", verbose)) {
         string meta = extract_meta(response.text, verbose);
         if (meta.empty()) return make_tuple("", "");
         //cout<<meta<<endl;
@@ -194,7 +194,7 @@ string get_title_from_id(const string& id, bool verbose) {
         cout<<"Attempting to get the title of video with id "<<id<<"..."<<endl;
     }
     auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
-    if (!check_successful_response(response, "YouTube")) {
+    if (!check_successful_response(response, "YouTube", verbose)) {
         if (verbose) cout<<"Could not find title"<<endl;
         return TITLE_UNKNOWN(id);
     }

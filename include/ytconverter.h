@@ -8,25 +8,27 @@
 class YTConverter {
 private:
     const std::string m_name;
+    const bool verbose;
     const size_t MAX_NUM_ATTEMPTS;
 protected:
     bool check_successful_response(const cpr::Response& response) const {
-        return ::check_successful_response(response, m_name);
+        return ::check_successful_response(response, m_name, verbose);
     }
     virtual cpr::Response try_download(const std::string& url);
 public:
-    YTConverter(const std::string& name, size_t mna) : m_name(name), MAX_NUM_ATTEMPTS(mna) {}
+    YTConverter(const std::string& name, size_t mna, bool ver) : 
+        m_name(name), MAX_NUM_ATTEMPTS(mna), verbose(ver) {}
     virtual ~YTConverter() {}
 
     virtual std::string get_link(const std::string& id) = 0;
-    virtual std::tuple<bool, std::string> download_song(const std::string& url, bool verbose);
+    virtual std::tuple<bool, std::string> download_song(const std::string& url);
 
     std::string get_name() const { return m_name; }
 };
 
 class ConvertMP3 : public YTConverter {
 public:
-    ConvertMP3() : YTConverter("ConvertMP3", 30) {}
+    ConvertMP3(bool verbose) : YTConverter("ConvertMP3", 30, verbose) {}
     std::string get_link(const std::string& id);
 };
 
@@ -37,13 +39,13 @@ private:
 
     cpr::Response try_download(const std::string& url);
 public:
-    PointMP3() : YTConverter("PointMP3", 40) {}
+    PointMP3(bool verbose) : YTConverter("PointMP3", 40, verbose) {}
     std::string get_link(const std::string& id);
 };
 
 class ThreeTwentyYT : public YTConverter {
 private:
 public:
-    ThreeTwentyYT() : YTConverter("320Youtube", 30) {}
+    ThreeTwentyYT(bool verbose) : YTConverter("320Youtube", 30, verbose) {}
     std::string get_link(const std::string& id);
 };

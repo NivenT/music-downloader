@@ -6,10 +6,12 @@
 
 using namespace std;
 
+static bool verbose_should_be_a_global_but_im_too_lazy_to_make_that_change_so_heres_a_hack;
+
 tuple<bool, string, string> get_lyrics(const string& url, const string& domain, const string& beg_tag,
                                        const string& end_tag, const string& rpl, bool ugly_while_loop) {
     auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
-    if (check_successful_response(response, domain)) {
+    if (check_successful_response(response, domain, verbose_should_be_a_global_but_im_too_lazy_to_make_that_change_so_heres_a_hack)) {
         int start = response.text.find(beg_tag);
         if (start != string::npos) {
             cout<<"Retrieving lyrics from "<<domain<<" ("<<url<<")"<<endl;
@@ -19,7 +21,7 @@ tuple<bool, string, string> get_lyrics(const string& url, const string& domain, 
                 end = response.text.find(end_tag, end+1);
             }
             string lyrics = remove_html_tags(response.text.substr(start, end-start), rpl);
-            return make_tuple(true, trim(remove_html_entites(lyrics, "")), domain);
+            return make_tuple(true, remove_html_entites(lyrics, ""), domain);
         }
     }
     return make_tuple(false, "", "");
@@ -29,10 +31,12 @@ void find_lyrics(const string& song, const string& saveFile, bool print, bool ve
     static const int NUM_RESULTS = 25;
     static const float DECAY = 0.95;
 
+    verbose_should_be_a_global_but_im_too_lazy_to_make_that_change_so_heres_a_hack = verbose;
+
     cout<<"Searching for the lyrics of \""<<song<<"\""<<endl
         <<endl;
 
-    string search_results = search_duckduckgo(song + " lyrics");
+    string search_results = search_duckduckgo(song + " lyrics", verbose);
     auto links = match_regex(search_results, R"([[:alpha:]]+\.(com|net)[_[:alnum:]/\.-]+)", NUM_RESULTS);
 
     bool found = false;

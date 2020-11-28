@@ -9,20 +9,19 @@ using json = nlohmann::json;
 using namespace std;
 
 // Is server even the right name for that argument?
-bool check_successful_response(const cpr::Response& response, const string& server) {
+bool check_successful_response(const cpr::Response& response, const string& server,
+                               bool verbose) {
     if (!response.status_code) {
-        cout<<"Error occurred ("<<(int)response.error.code<<"):"<<endl
-            <<response.error.message<<endl
-            <<endl
-            <<"Program used to exit in this case, but no longer does."<<endl
+        cout<<"Error occurred ("<<(int)response.error.code<<"):"<<endl;
+        if (verbose) cout<<response.error.message<<endl<<endl;
+        cout<<"Program used to exit in this case, but no longer does."<<endl
             <<"Unclear how properly it will handle this error..."<<endl
             <<endl;
         return false;
     } else if (response.status_code/100 == 4) {
-        cout<<server<<" response ("<<response.status_code<<"):"<<endl
-            <<response.text<<endl
-            <<endl
-            <<"Program used to exit in this case, but no longer does."<<endl
+        cout<<server<<" response ("<<response.status_code<<"):"<<endl;
+        if (verbose) cout<<response.text<<endl<<endl;
+        cout<<"Program used to exit in this case, but no longer does."<<endl
             <<"Unclear how properly it will handle this error..."<<endl
             <<endl;
         return false;
@@ -44,12 +43,12 @@ string construct_query(const json& request, const vector<string>& keys) {
     return query;
 }
 
-string search_duckduckgo(const string& query) {
+string search_duckduckgo(const string& query, bool verbose) {
     string url = "https://duckduckgo.com/html/?q=" + urlify(query);
 
     cout<<"DuckDuckGo URL: "<<url<<endl;
     auto response = cpr::Get(cpr::Url{url}, cpr::VerifySsl{false});
-    return check_successful_response(response, "DuckDuckGo") ? response.text : "";
+    return check_successful_response(response, "DuckDuckGo", verbose) ? response.text : "";
 }
 
 string remove_html_tags(const string& html, const string& rpl) {
