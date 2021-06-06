@@ -18,15 +18,23 @@ tuple<bool, string> YTConverter::download_song(const string& url) {
     bool fail;
     // Should did be a do/while?
     auto response = try_download(url);
-    for (int i = 0; (fail = doAgain(response.text)) && check_successful_response(response) && i < MAX_NUM_ATTEMPTS; ++i) {
-        if (verbose && i%10 == 9) cout<<TAB<<TAB<<TAB<<"Attempt "<<(i+1)<<" / "<<MAX_NUM_ATTEMPTS<<"..."<<endl;
+    for (int i = 0; (fail = doAgain(response.text)) && check_successful_response(response) && i < MAX_NUM_DOWNLOAD_ATTEMPTS; ++i) {
+        if (verbose && i%10 == 9) cout<<TAB<<TAB<<TAB<<"Attempt "<<(i+1)<<" / "<<MAX_NUM_DOWNLOAD_ATTEMPTS<<"..."<<endl;
         response = try_download(url);
     }
     // check_successful_response here may not be needed
     return make_tuple(!fail && check_successful_response(response), response.text);
 }
 
-string ConvertMP3::get_link(const string& id) {
+string YTConverter::get_link(const string& id) {
+    for (int i = 0; i < MAX_NUM_LINK_ATTEMPTS; i++) {
+        string link = try_get_link(id);
+        if (link != "") return link;
+    }
+    return "";
+}
+
+string ConvertMP3::try_get_link(const string& id) {
     json request;
     request["video"] = "http://www.youtube.com/watch?v=" + id;
     request["autostart"] = "1";
@@ -50,7 +58,7 @@ cpr::Response PointMP3::try_download(const string& url) {
     return cpr::Get(cpr::Url{url}, cpr::Header{{"Referer", m_referrer}});
 }
 
-string PointMP3::get_link(const string& id) {
+string PointMP3::try_get_link(const string& id) {
     auto response = cpr::Get(cpr::Url{"http://api.pointmp3.com/dl/v2/"},
                              cpr::Parameters{{"format", "mp3"},
                                              {"req", "http://www.youtube.com/watch?v=" + id}
@@ -67,7 +75,7 @@ string PointMP3::get_link(const string& id) {
 }
 
 // https://www.320youtube.com/v3/watch?v=nROM6th0teA
-string ThreeTwentyYT::get_link(const string& id) {
+string ThreeTwentyYT::try_get_link(const string& id) {
     auto response = cpr::Get(cpr::Url{"http://320youtube.com/v3/watch?v=" + id});
     if (!check_successful_response(response)) return "";
 
@@ -78,4 +86,20 @@ string ThreeTwentyYT::get_link(const string& id) {
         }   
     }
     return "";
+}
+
+string MP3Convert::try_get_link(const string& id) {
+    auto response = cpr::Post(cpr::Url{"http://mp3-convert.org/get.php"},
+                              cpr::Parameters{{"r", "hudar12"},
+                                              {"id", id},
+                                              {"t", "1623015701157"},
+                                             },                                
+                              cpr::Header{{"Referer", "https://mp3-convert.org"}}
+                              );
+    if (!check_successful_response(response)) return "";
+    //cout<<"response:"<<endl<<response.text<<endl;
+    json resp = json::parse(response.text);
+    if (resp.find("download_url") == resp.end()) return "";
+    
+    return resp["download_url"];
 }

@@ -11,14 +11,14 @@
 #include "search_and_play.h"
 #include "ytconverter.h"
 #include "youtube.h"
-
+ 
 using namespace std;
 
 extern std::vector<YTConverter*> converters;
 
 // TODO: Give --play-song a better name
 static const char* USAGE =
-R"({progName}
+    R"({progName}
 
 Usage:
     {progName} (-h | --help)
@@ -77,7 +77,15 @@ string get_key(docopt::value key, const docopt::value& file_name) {
     return "";
 }
 
+bool testing_stuff() {
+    return false;
+    // Do test
+    return true;
+} 
+
 int main(int argc, const char** argv) {
+    if (testing_stuff()) return 0;
+  
     static const string stars(100, '*');
     srand(time(nullptr));
 
@@ -89,28 +97,29 @@ int main(int argc, const char** argv) {
 
     map<string, docopt::value> args =
         docopt::docopt(replace_all(USAGE, "{progName}", argv[0]),
-                                   {vargv.data()+1, vargv.data() + vargv.size()});
+                       {vargv.data()+1, vargv.data() + vargv.size()});
 
     string songList = args["--songs"].asString(), 
-           saveFolder = args["--dest"].asString(),
-           song = args["--lyrics"].asString(),
-           saveFile = args["--save"].asString(),
-           songFolder = args["--dir"].asString(),
-           apikey = trim(get_key(args["--api-key"], args["--api-file"]));
+        saveFolder = args["--dest"].asString(),
+        song = args["--lyrics"].asString(),
+        saveFile = args["--save"].asString(),
+        songFolder = args["--dir"].asString(),
+        apikey = trim(get_key(args["--api-key"], args["--api-file"]));
 
     bool print = !args["--hide"].asBool(),
-         verbose = args["--verbose"].asBool(),
-         lyrics = args["--show-lyrics"].asBool(),
-         playout = args["--show-play-output"].asBool(),
-         keep = args["--keep"].asBool();
+        verbose = args["--verbose"].asBool(),
+        lyrics = args["--show-lyrics"].asBool(),
+        playout = args["--show-play-output"].asBool(),
+        keep = args["--keep"].asBool();
 
     vector<string> songs = args["--download"].asStringList(),
-                   yt_ids = args["--yt-ids"].asStringList();
+        yt_ids = args["--yt-ids"].asStringList();
 
     map<string, set<string>> stats;
     saveFolder += ends_with(saveFolder, "/") ? "" : "/";
     songFolder += ends_with(songFolder, "/") ? "" : "/";
 
+    converters.push_back(new MP3Convert(verbose));
     converters.push_back(new ThreeTwentyYT(verbose));
     converters.push_back(new PointMP3(verbose));
     converters.push_back(new ConvertMP3(verbose));

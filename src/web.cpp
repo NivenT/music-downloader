@@ -14,16 +14,10 @@ bool check_successful_response(const cpr::Response& response, const string& serv
     if (!response.status_code) {
         cout<<"Error occurred ("<<(int)response.error.code<<"):"<<endl;
         if (verbose) cout<<response.error.message<<endl<<endl;
-        cout<<"Program used to exit in this case, but no longer does."<<endl
-            <<"Unclear how properly it will handle this error..."<<endl
-            <<endl;
         return false;
     } else if (response.status_code/100 == 4) {
         cout<<server<<" response ("<<response.status_code<<"):"<<endl;
         if (verbose) cout<<response.text<<endl<<endl;
-        cout<<"Program used to exit in this case, but no longer does."<<endl
-            <<"Unclear how properly it will handle this error..."<<endl
-            <<endl;
         return false;
     } else if (response.status_code/100 != 2) {
         cout<<server<<" response ("<<response.status_code<<"):"<<endl
